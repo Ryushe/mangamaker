@@ -88,8 +88,14 @@ def handle_img_files():
                         files_good = False
     if files_good:
         print("Files handled sucessfully")
+        # deltes empty folders
+        for folder in os.listdir(tmp_directory):
+            folder_path = os.path.join(tmp_directory, folder)
+            if os.path.isdir(folder_path):
+                shutil.rmtree(folder_path)
     else:
         print("Error with overall files, please rerun program")
+        exit()
 
 #add empty directory check
     # for folder in tmp
@@ -107,9 +113,10 @@ def move_jpg_tmp(file, path):
         print(f"File {file} not moved correctly")
 
 
-def change_to_cbz(title):
+# check to see if works 
+def change_to_cbz(title): 
     print("Making archive to convert to mobi")
-    temp_dir = make_tempdir("")
+    temp_dir = make_tempdir(".tmp")
     output_location = os.path.join(temp_dir ,title)
     try:
         shutil.make_archive(title, 'zip', temp_dir)
@@ -152,7 +159,7 @@ def main():
     # moves img files to .tmp and removes empty folders they came from
     handle_img_files()
     time.sleep(1)
-    change_to_cbz(title)
+    #change_to_cbz(title)
     
     #os.rmdir(os.path.join(os.getcwd(),'.tmp'))
 
@@ -161,3 +168,6 @@ if __name__ == "__main__":
 
 # todo:
     # make lists sort (more accurate)
+    # check to see if can convert to cbz
+    # add kcc in 
+    # add error handling
