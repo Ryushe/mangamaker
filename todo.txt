@@ -1,4 +1,0 @@
-1. extract files from zip
-2. move extracted files into new folder chaning their names to be in order
-3. export the list of png files into a cbz
-4. run kcc to 
