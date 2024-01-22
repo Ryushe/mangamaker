@@ -28,20 +28,33 @@ def zip_to_cbz():
         print("Trying to create cbz_files")
         zip_to_cbz()
 
+class TempDir:
 
-def make_tempdir(dirname):
-    try:
-        print(f"attempting to create tempdir {dirname}")
-        temp_dir = os.path.join(os.getcwd(), dirname)
-        os.mkdir(temp_dir)
-    except FileExistsError:
-        print(f"dir {dirname} already exists (no biggie)")
-    return temp_dir
+    def make_tempdir(self, dirname):
+        try:
+            print(f"attempting to create tempdir {dirname}")
+            self.temp_dir = os.path.join(os.getcwd(), dirname)
+            os.mkdir(self.temp_dir)
+        except FileExistsError:
+            print(f"dir {dirname} already exists (no biggie)")
+        return self.temp_dir
+    
+    def close(self):
+        # gets the path of the temp folder
+        temp_path = os.path.realpath(self.temp_dir.name)
+        if os.path.exists(self.temp_dir.name):
+            try:
+                shutil.rmtree(temp_path)
+                print(f"Sucessfully removed {temp_path}")
+            except FileNotFoundError:
+                print(f"{self.temp_dir.name} doen't exist")
+            except Exception as e:
+                print(f"Tried to remove {self.temp_dir.name} but failed")
+                print(f"Error when trying to remove {e}")
+               
 
 
 def extract(archives_path): 
-
-    temp_dir = make_tempdir('.tmp')
 
     # for file in archive(defualt) folder extract to .tmp
     for file in os.listdir(archives_path):
@@ -57,12 +70,11 @@ def extract(archives_path):
 # renames and moves all .jpg files in tmp
 def handle_img_files():
     filename_count = 0
-    tmp_directory = os.path.join(os.getcwd(), '.tmp') # tmp created in extract()
     files_good = True
 
     # for folder in .tmp do..
-    for folder in os.listdir(tmp_directory):
-        folder_path = os.path.join(tmp_directory, folder)
+    for folder in os.listdir(temp_dir):
+        folder_path = os.path.join(temp_dir, folder)
         # check if is folder in .tmp
         if os.path.isdir(folder_path):
             # for file in the folder
@@ -72,7 +84,7 @@ def handle_img_files():
                 if os.path.isfile(file_path) and file_path.endswith(".jpg"):
                     try:
                         new_filename = f"{filename_count}.jpg"
-                        new_filepath = os.path.join(tmp_directory, f"{filename_count}.jpg") # .tmp + new_filename
+                        new_filepath = os.path.join(temp_dir, f"{filename_count}.jpg") # .tmp + new_filename
 
                         new_filename = os.path.join(folder_path, new_filename)
                         # print(f"Renaming: {file}")
@@ -89,8 +101,8 @@ def handle_img_files():
     if files_good:
         print("Files handled sucessfully")
         # deltes empty folders
-        for folder in os.listdir(tmp_directory):
-            folder_path = os.path.join(tmp_directory, folder)
+        for folder in os.listdir(temp_dir):
+            folder_path = os.path.join(temp_dir, folder)
             if os.path.isdir(folder_path):
                 shutil.rmtree(folder_path)
     else:
@@ -99,7 +111,7 @@ def handle_img_files():
 
 #add empty directory check
     # for folder in tmp
-    for empty_folder in os.listdir(tmp_directory):
+    for empty_folder in os.listdir(temp_dir):
         # if is a directory and empty
         if os.path.isdir(empty_folder):
             os.rmdir(empty_folder)
@@ -114,14 +126,13 @@ def move_jpg_tmp(file, path):
 
 
 # check to see if works 
-def change_to_cbz(title): 
+def change_to_cbz(output, title): 
     print("Making archive to convert to mobi")
-    temp_dir = make_tempdir(".tmp")
-    output_location = os.path.join(temp_dir ,title)
     try:
-        shutil.make_archive(title, 'zip', temp_dir)
+        zip_path = os.path.join(temp_dir, title)
+        shutil.make_archive(zip_path, 'zip', temp_dir) # output, type, source
         cbz_path = temp_dir + title[:-4] + ".cbz" 
-        os.rename()
+        os.rename(zip_path + ".zip", cbz_path) 
     except:
         print("Error making zip file")
 
@@ -136,9 +147,13 @@ def get_title(zip_path):
 
 
 def main():
+    global temp_dir
+    temp = TempDir()
+    temp_dir = temp.make_tempdir('.tmp')
     parser = argparse.ArgumentParser(description="Main file to merge files.")
-    parser.add_argument('-o', '--output', help='output location', type=str, default=r'.\volumes')
+    parser.add_argument('-o', '--output', help='output location', type=str, default=r'.\volumes') # might be broken (have to specify path in weird ways)
     parser.add_argument('-p', '--path', help='path to your cbz archives', type=str, default=r'.\archives')
+    parser.add_argument('--keep', help='Keep cbz files default:false (True/False)', type=bool, default=False)
     args = parser.parse_args()
 
     title = get_title(args.path)
@@ -159,7 +174,8 @@ def main():
     # moves img files to .tmp and removes empty folders they came from
     handle_img_files()
     time.sleep(1)
-    #change_to_cbz(title)
+    # change_to_cbz(args.output, title)
+     
     
     #os.rmdir(os.path.join(os.getcwd(),'.tmp'))
 
