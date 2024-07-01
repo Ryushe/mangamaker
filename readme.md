@@ -23,3 +23,7 @@ Current options:
     - default: False (doesn't keep them)
 4. `--skip` (WIP)
     - skips to the very end and only uses kcc on files you want
+	
+# Todo
+1. auto get downloaded zip files
+2. find and download ico files for the anime
