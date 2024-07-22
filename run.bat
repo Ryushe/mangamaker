@@ -1,1 +1,1 @@
-python mangamaker.py
+python cli.py
