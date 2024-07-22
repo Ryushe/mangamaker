@@ -1,5 +1,5 @@
 import argparse
-import mangamaker
+import mangamaker as mangamaker
 
 def cli():
     parser = argparse.ArgumentParser(description="Main file to merge files.")

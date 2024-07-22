@@ -3,7 +3,7 @@ import patoolib
 import os
 import shutil
 import time
-import argparse
+import utils.filemetadata as filemetadata
 
  
 class TempDir:
@@ -67,7 +67,7 @@ def handle_img_files(img_dir):
             # for file in the folder
             for file in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, file)
-                print(f"Working on file:\n{file_path}")
+                # print(f"Working on file:\n{file_path}")
                 if os.path.isfile(file_path) and file_path.endswith(".jpg"):
 # add other img functionality
                     try:
@@ -147,17 +147,7 @@ def get_names(input_folder):
 
 
 def main(args):
-#     parser = argparse.ArgumentParser(description="Main file to merge files.")
-#     parser.add_argument('-o', '--output', help='output location (full path)', type=str, default=r'volumes') # might be broken (have to specify path in weird ways)
-#     parser.add_argument('-i', '--input', help='path to your cbz archives', type=str, default=r'archives')
-#     parser.add_argument('--keep', help='Keep cbz files default:false (True/False)', type=bool, default=False)
-#     parser.add_argument('--batch_size', help='How many zip files to put in each mobi (5)', type=int, default=5)
-# # add functionality (make it so that if you already have the cbz you can just use kcc on it)
-#     parser.add_argument('--skip', help='only use kcc with local archives folder', type=bool, default=False) 
-#     args = parser.parse_args()
-
     batch_size = args.batch_size
-
     # make volumes if doesn't already exist
     try:
         os.makedirs("volumes")
@@ -167,6 +157,7 @@ def main(args):
 
     archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
     archive_names, folder_name = get_names(args.input)
+    cover_count = max(1, (len(archive_paths)+4) // 5)
     for i in range(0, len(archive_paths), args.batch_size):
         img = TempDir()
         cbz = TempDir()
