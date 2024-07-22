@@ -9,12 +9,18 @@ import argparse
 class TempDir:
 
     def make_tempdir(self, dirname):
+        self.temp_dir = os.path.join(os.getcwd(), dirname)
         try:
             print(f"attempting to create tempdir {dirname}")
-            self.temp_dir = os.path.join(os.getcwd(), dirname)
             os.mkdir(self.temp_dir)
         except FileExistsError:
-            print(f"dir {dirname} already exists (no biggie)")
+            print(f"Clearing {dirname} (Because it exists already)")
+            try:
+                shutil.rmtree(self.temp_dir)
+                os.mkdir(self.temp_dir)
+            except:
+                print(f"Please manually remove {dirname} before continuing")
+                exit()
         return self.temp_dir
     
     def close(self):
@@ -31,22 +37,25 @@ class TempDir:
                 print(f"Error when trying to remove {e}")
                
 
+# song-of-the-night-walkers_c191 _ c200.5.zip
+def get_title(batch_names): 
+    name = batch_names[0].split("_")[0]
+    first = batch_names[0].split("_")[1]
+    last = batch_names[-1].split("_")[2]
+    return f"{name}_{first}_{last}"
 
-def extract(archives_path): 
 
+def extract(batch, img_dir): 
     # for file in archive(defualt) folder extract to .tmp
-    for file in os.listdir(archives_path):
-    # if not a folder
-        file_check_path = os.path.join(archives_path, file)
-        if os.path.isfile(file_check_path):
-            try:
-                patoolib.extract_archive(os.path.join(archives_path, file), outdir=img_dir)
-            except: 
-                print("these files already exist")
+    for file in batch:
+        try:
+            patoolib.extract_archive(file , outdir=img_dir)
+        except: 
+            print("these files already exist")
 
 
 # renames and moves all .jpg files in tmp
-def handle_img_files():
+def handle_img_files(img_dir):
     filename_count = 0
     files_good = True
 
@@ -75,7 +84,7 @@ def handle_img_files():
                     
 # could add a rerun feature if failed
                     except:
-                        print("file {file} could't be renamed")
+                        print(f"file {file} could't be renamed")
                         files_good = False
     if files_good:
         print("Files handled sucessfully")
@@ -104,13 +113,8 @@ def move_jpg_tmp(file, path):
         print(f"File {file} not moved correctly")
 
 
-# check to see if works 
-def change_to_cbz(title): 
+def change_to_cbz(title, img_dir, cbz_dir): 
     print("Making archive to convert to mobi")
-    global cbz_dir
-    global cbz 
-    cbz = TempDir()
-    cbz_dir = cbz.make_tempdir(".tmp_cbz")
     try:
         zip_path = os.path.join(cbz_dir, title)
         shutil.make_archive(zip_path, 'zip', img_dir) # output, type, source
@@ -124,17 +128,7 @@ def change_to_cbz(title):
         print("Error making .cbz file")
 
 
-def get_title(zip_path): 
-    zip_path = os.path.join(os.getcwd(),zip_path)
-    names = sorted(os.listdir(zip_path))
-    title_first_chapt = names[0].split(" ")[0]
-    title_last_chapt = names[-1].strip().replace(' ', '').split("_")[2][:-4]
-    title_last_chapt = f"_{title_last_chapt}"
-
-    return title_first_chapt+title_last_chapt
-
-
-def use_kcc(title, output):
+def use_kcc(title, output, cbz_dir):
     # output = os.path.join(os.getcwd(),output)
     output = os.path.abspath(output)
     print('output = '+output)
@@ -144,21 +138,27 @@ def use_kcc(title, output):
 
     subprocess.run(command, shell=True)
 
+def get_names(input_folder):
+    zip_path = os.path.join(input_folder)
+    origional_names = sorted(os.listdir(zip_path))
+    names = [name.replace(' ', '')[:-4] for name in origional_names]
+    folder_name = origional_names[0].split("_")[0]
+    return names, folder_name
+
 
 def main():
-    global img_dir
-    img = TempDir()
-    img_dir = img.make_tempdir('.tmp_img')
+
+
     parser = argparse.ArgumentParser(description="Main file to merge files.")
     parser.add_argument('-o', '--output', help='output location (full path)', type=str, default=r'volumes') # might be broken (have to specify path in weird ways)
     parser.add_argument('-i', '--input', help='path to your cbz archives', type=str, default=r'archives')
     parser.add_argument('--keep', help='Keep cbz files default:false (True/False)', type=bool, default=False)
+    parser.add_argument('--batch_size', help='How many zip files to put in each mobi (5)', type=int, default=5)
 # add functionality (make it so that if you already have the cbz you can just use kcc on it)
     parser.add_argument('--skip', help='only use kcc with local archives folder', type=bool, default=False) 
     args = parser.parse_args()
 
-    title = get_title(args.input)
-    print(title)
+    batch_size = args.batch_size
 
     # make volumes if doesn't already exist
     try:
@@ -166,21 +166,28 @@ def main():
         print("made folder volumes")
     except FileExistsError:
         print("The folder volumes already exists, moving on")
-    
-    # extracts archives into .tmp
-    extract(args.input) 
-    print("Waiting for files to get into .tmp")
-    time.sleep(1)
-    print("Processing files...")
-    # moves img files to .tmp and removes empty folders they came from
-    handle_img_files()
-    time.sleep(1)
-    change_to_cbz(title)
-    print("Using KCC to crop and correct the images")
-    time.sleep(1)
-    use_kcc(title, args.output) 
 
-    if args.keep == False:
+    archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
+    archive_names, folder_name = get_names(args.input)
+    for i in range(0, len(archive_paths), args.batch_size):
+        img = TempDir()
+        cbz = TempDir()
+        img_dir = img.make_tempdir('.tmp_img')
+        cbz_dir = cbz.make_tempdir(".tmp_cbz")
+        batch = archive_paths[i:i+batch_size]
+        batch_names = archive_names[i:i+batch_size] 
+        title = get_title(batch_names)
+
+        print(title)
+        print(batch, batch_names)
+        extract(batch, img_dir) # for file in input dir -> extracts to img_dir
+        print("Processing files...")
+        # moves img files to .tmp and removes empty folders they came from
+        handle_img_files(img_dir)
+        change_to_cbz(title, img_dir, cbz_dir) # if have issues with multiple zip start here
+        print("Using KCC to crop and correct the images")
+        use_kcc(title, args.output, cbz_dir) 
+
         img.close()
         cbz.close()
 
