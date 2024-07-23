@@ -6,7 +6,7 @@ class TempDir:
     def make_tempdir(self, dirname):
         self.temp_dir = os.path.join(os.getcwd(), dirname)
         try:
-            print(f"attempting to create tempdir {dirname}")
+            print(f"Creating tempdir {dirname}")
             os.mkdir(self.temp_dir)
         except FileExistsError:
             print(f"Clearing {dirname} (Because it exists already)")

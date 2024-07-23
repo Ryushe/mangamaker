@@ -90,7 +90,7 @@ def correctly_indexed_cover_urls(file_names, cover_urls):
   elif len(cover_urls) == len(file_names):
     return cover_urls
 
-
+ 
 def download_covers(cover_urls, file_names):
   # need to download as jumber of covers and then give the name from file names
   cover_imgs = tmp.TempDir()
@@ -98,28 +98,30 @@ def download_covers(cover_urls, file_names):
   cover_urls = correctly_indexed_cover_urls(file_names, cover_urls)
 
   # fix below (not doing anything rn)
-  # for cover, file in zip(cover_urls, file_names):
-  #   try: 
-  #     response = requests.get(cover, stream=True)
-  #     response.raise_for_status()
-  #     cover_path = os.path.join(cover_dir, file_names)
-  #   except requests.exceptions.RequestException as e:
-  #     print(f"Error downloading image: {e}")
+  for cover, file in zip(cover_urls, file_names):
+    try: 
+      response = requests.get(cover, stream=True)
+      response.raise_for_status()
+      cover_path = os.path.join(cover_dir, file + cover[-4:])
+      open(cover_path, 'wb').write(response.content)
+    except requests.exceptions.RequestException as e:
+      print(f"Error downloading image: {e}")
 
 
 def main(anime, file_names):
     manga_url = get_manga_url(anime) # eventually have a way to pick which urls are best
     cover_urls = get_img_urls(manga_url)
-    download_covers(cover_urls, file_names)
+    download_covers(cover_urls, sorted(file_names))
     
 
     # need to download the cover and then edit the meta of the volumes 
     # could make a tmp to do this (so make a file with the tmp so that I can use it everywhere)
 
 anime = 'jagaaaaaa'
-file_names = ["ligma_c001_c050", "ligma2_c051_c100", "ligma3_c101_c150"] # <- is var title
+file_names = ["ligma_c051_c100", "ligma_c101_c150", "ligma_c001_c050"] # <- is var title
 cover_count = 2
-# main(anime, file_names) 
+main(anime, file_names) 
+
 
 
  
