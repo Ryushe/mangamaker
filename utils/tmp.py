@@ -3,8 +3,16 @@ import shutil
  
 class TempDir:
 
+    def __init__(self):
+        try: 
+            self.tmp = ".tmp"
+            self.tmp_folder = os.path.join(os.getcwd(), self.tmp)
+            os.mkdir(self.tmp_folder)
+        except:
+            print("tmp exists bozo")
+
     def make_tempdir(self, dirname):
-        self.temp_dir = os.path.join(os.getcwd(), dirname)
+        self.temp_dir = os.path.join(os.getcwd(), self.tmp, dirname)
         try:
             print(f"Creating tempdir {dirname}")
             os.mkdir(self.temp_dir)

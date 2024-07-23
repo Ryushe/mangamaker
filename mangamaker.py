@@ -126,6 +126,13 @@ def get_covers_needed(num_of_paths, batch_size):
 
 
 def main(args):
+    archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
+    archive_names, folder_name = get_names(args.input)
+
+    if args.imgs: 
+        filemetadata.main(str(folder_name).lower(), archive_names) 
+        exit()
+
     batch_size = args.batch_size
     # make volumes if doesn't already exist
     try:
@@ -134,9 +141,6 @@ def main(args):
     except FileExistsError:
         print("The folder volumes already exists, moving on")
 
-    archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
-    archive_names, folder_name = get_names(args.input)
-    cover_count = max(1, get_covers_needed(len(archive_paths), args.batch_size))
     for i in range(0, len(archive_paths), args.batch_size):
         img = tmp.TempDir()
         cbz = tmp.TempDir()
