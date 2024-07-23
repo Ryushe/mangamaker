@@ -4,38 +4,9 @@ import os
 import shutil
 import time
 import utils.filemetadata as filemetadata
+import utils.tmp as tmp
 
- 
-class TempDir:
 
-    def make_tempdir(self, dirname):
-        self.temp_dir = os.path.join(os.getcwd(), dirname)
-        try:
-            print(f"attempting to create tempdir {dirname}")
-            os.mkdir(self.temp_dir)
-        except FileExistsError:
-            print(f"Clearing {dirname} (Because it exists already)")
-            try:
-                shutil.rmtree(self.temp_dir)
-                os.mkdir(self.temp_dir)
-            except:
-                print(f"Please manually remove {dirname} before continuing")
-                exit()
-        return self.temp_dir
-    
-    def close(self):
-        # gets the path of the temp folder
-        temp_path = os.path.realpath(self.temp_dir)
-        if os.path.exists(self.temp_dir):
-            try:
-                shutil.rmtree(temp_path)
-                print(f"Sucessfully removed {temp_path}")
-            except FileNotFoundError:
-                print(f"{self.temp_dir.name} doen't exist")
-            except Exception as e:
-                print(f"Tried to remove {self.temp_dir.name} but failed")
-                print(f"Error when trying to remove {e}")
-               
 
 # song-of-the-night-walkers_c191 _ c200.5.zip
 def get_title(batch_names): 
@@ -142,8 +113,16 @@ def get_names(input_folder):
     zip_path = os.path.join(input_folder)
     origional_names = sorted(os.listdir(zip_path))
     names = [name.replace(' ', '')[:-4] for name in origional_names]
-    folder_name = origional_names[0].split("_")[0]
+    folder_name = origional_names[0].split("_")[0].replace("-", " ")
     return names, folder_name
+
+
+def get_covers_needed(num_of_paths, batch_size):
+    while num_of_paths % batch_size != 0:
+        num_of_paths += 1
+    cover_ammount = num_of_paths // batch_size    
+    return cover_ammount
+
 
 
 def main(args):
@@ -157,10 +136,10 @@ def main(args):
 
     archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
     archive_names, folder_name = get_names(args.input)
-    cover_count = max(1, (len(archive_paths)+4) // 5)
+    cover_count = max(1, get_covers_needed(len(archive_paths), args.batch_size))
     for i in range(0, len(archive_paths), args.batch_size):
-        img = TempDir()
-        cbz = TempDir()
+        img = tmp.TempDir()
+        cbz = tmp.TempDir()
         img_dir = img.make_tempdir('.tmp_img')
         cbz_dir = cbz.make_tempdir(".tmp_cbz")
         batch = archive_paths[i:i+batch_size]
@@ -173,9 +152,11 @@ def main(args):
         print("Processing files...")
         # moves img files to .tmp and removes empty folders they came from
         handle_img_files(img_dir)
-        change_to_cbz(title, img_dir, cbz_dir) # if have issues with multiple zip start here
+        change_to_cbz(title, img_dir, cbz_dir) 
         print("Using KCC to crop and correct the images")
         use_kcc(title, args.output, cbz_dir) 
+
+        # filemetadata.main(anime, file_names, cover_count)
 
         img.close()
         cbz.close()
