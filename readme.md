@@ -21,7 +21,10 @@ Current options:
 3. `--keep`
     - doesn't remove the img/cbz folders when finished
     - default: False (doesn't keep them)
-4. `--skip` (WIP)
+4. `--batch_size`
+    - How many zip files to put in each mobi
+    - default: 5
+5. `--skip` (WIP)
     - skips to the very end and only uses kcc on files you want
 	
 # Todo

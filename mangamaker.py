@@ -3,50 +3,20 @@ import patoolib
 import os
 import shutil
 import time
-import argparse
+import utils.filemetadata as filemetadata
+import utils.tmp as tmp
 
- 
-class TempDir:
-
-    def make_tempdir(self, dirname):
-        try:
-            print(f"attempting to create tempdir {dirname}")
-            self.temp_dir = os.path.join(os.getcwd(), dirname)
-            os.mkdir(self.temp_dir)
-        except FileExistsError:
-            print(f"dir {dirname} already exists (no biggie)")
-        return self.temp_dir
-    
-    def close(self):
-        # gets the path of the temp folder
-        temp_path = os.path.realpath(self.temp_dir)
-        if os.path.exists(self.temp_dir):
-            try:
-                shutil.rmtree(temp_path)
-                print(f"Sucessfully removed {temp_path}")
-            except FileNotFoundError:
-                print(f"{self.temp_dir.name} doen't exist")
-            except Exception as e:
-                print(f"Tried to remove {self.temp_dir.name} but failed")
-                print(f"Error when trying to remove {e}")
-               
-
-
-def extract(archives_path): 
-
+def extract(batch, img_dir): 
     # for file in archive(defualt) folder extract to .tmp
-    for file in os.listdir(archives_path):
-    # if not a folder
-        file_check_path = os.path.join(archives_path, file)
-        if os.path.isfile(file_check_path):
-            try:
-                patoolib.extract_archive(os.path.join(archives_path, file), outdir=img_dir)
-            except: 
-                print("these files already exist")
+    for file in batch:
+        try:
+            patoolib.extract_archive(file , outdir=img_dir)
+        except: 
+            print("these files already exist")
 
 
 # renames and moves all .jpg files in tmp
-def handle_img_files():
+def handle_img_files(img_dir):
     filename_count = 0
     files_good = True
 
@@ -58,7 +28,7 @@ def handle_img_files():
             # for file in the folder
             for file in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, file)
-                print(f"Working on file:\n{file_path}")
+                # print(f"Working on file:\n{file_path}")
                 if os.path.isfile(file_path) and file_path.endswith(".jpg"):
 # add other img functionality
                     try:
@@ -75,7 +45,7 @@ def handle_img_files():
                     
 # could add a rerun feature if failed
                     except:
-                        print("file {file} could't be renamed")
+                        print(f"file {file} could't be renamed")
                         files_good = False
     if files_good:
         print("Files handled sucessfully")
@@ -104,13 +74,8 @@ def move_jpg_tmp(file, path):
         print(f"File {file} not moved correctly")
 
 
-# check to see if works 
-def change_to_cbz(title): 
+def change_to_cbz(title, img_dir, cbz_dir): 
     print("Making archive to convert to mobi")
-    global cbz_dir
-    global cbz 
-    cbz = TempDir()
-    cbz_dir = cbz.make_tempdir(".tmp_cbz")
     try:
         zip_path = os.path.join(cbz_dir, title)
         shutil.make_archive(zip_path, 'zip', img_dir) # output, type, source
@@ -124,17 +89,7 @@ def change_to_cbz(title):
         print("Error making .cbz file")
 
 
-def get_title(zip_path): 
-    zip_path = os.path.join(os.getcwd(),zip_path)
-    names = sorted(os.listdir(zip_path))
-    title_first_chapt = names[0].split(" ")[0]
-    title_last_chapt = names[-1].strip().replace(' ', '').split("_")[2][:-4]
-    title_last_chapt = f"_{title_last_chapt}"
-
-    return title_first_chapt+title_last_chapt
-
-
-def use_kcc(title, output):
+def use_kcc(title, output, cbz_dir):
     # output = os.path.join(os.getcwd(),output)
     output = os.path.abspath(output)
     print('output = '+output)
@@ -144,21 +99,49 @@ def use_kcc(title, output):
 
     subprocess.run(command, shell=True)
 
+def get_names(input_folder):
+    zip_path = os.path.join(input_folder)
+    origional_names = sorted(os.listdir(zip_path))
+    names = [name.replace(' ', '')[:-4] for name in origional_names]
+    folder_name = origional_names[0].split("_")[0]
+    search_query = origional_names[0].split("_")[0].replace("-", " ")
+    return names, folder_name, search_query
 
-def main():
-    global img_dir
-    img = TempDir()
-    img_dir = img.make_tempdir('.tmp_img')
-    parser = argparse.ArgumentParser(description="Main file to merge files.")
-    parser.add_argument('-o', '--output', help='output location (full path)', type=str, default=r'volumes') # might be broken (have to specify path in weird ways)
-    parser.add_argument('-i', '--input', help='path to your cbz archives', type=str, default=r'archives')
-    parser.add_argument('--keep', help='Keep cbz files default:false (True/False)', type=bool, default=False)
-# add functionality (make it so that if you already have the cbz you can just use kcc on it)
-    parser.add_argument('--skip', help='only use kcc with local archives folder', type=bool, default=False) 
-    args = parser.parse_args()
 
-    title = get_title(args.input)
-    print(title)
+def get_titles(names, batch_size):
+    lists = []
+    for i in range(0, len(names), batch_size):
+        lists.append(names[i:i+batch_size])
+
+    titles = []
+    for list in lists:
+        name = list[0].split("_")[0]
+        first = list[0].split("_")[1]
+        last = list[-1].split("_")[2]
+        titles.append( f"{name}_{first}_{last}")
+        
+    return titles
+
+def make_folder(path, name):
+    try:
+        path = os.path.join(path, name)
+        os.mkdir(path)
+    except FileExistsError:
+        print(f"{name} already exists")
+    return path
+
+
+def main(args):
+    archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
+    archive_names, folder_name, search_query = get_names(args.input)
+    titles = get_titles(archive_names, args.batch_size)
+    kcc_output_folder = make_folder(args.output, folder_name)
+    title_index = 0
+    if args.imgs: 
+        title_index +=1
+        # get array of titles for filemetadata.py
+        filemetadata.main(anime=str(search_query).lower(), file_names=titles) 
+        exit()
 
     # make volumes if doesn't already exist
     try:
@@ -166,27 +149,32 @@ def main():
         print("made folder volumes")
     except FileExistsError:
         print("The folder volumes already exists, moving on")
-    
-    # extracts archives into .tmp
-    extract(args.input) 
-    print("Waiting for files to get into .tmp")
-    time.sleep(1)
-    print("Processing files...")
-    # moves img files to .tmp and removes empty folders they came from
-    handle_img_files()
-    time.sleep(1)
-    change_to_cbz(title)
-    print("Using KCC to crop and correct the images")
-    time.sleep(1)
-    use_kcc(title, args.output) 
 
-    if args.keep == False:
+    img = tmp.TempDir()
+    cbz = tmp.TempDir()
+    for i in range(0, len(archive_paths), args.batch_size):
+        batch = archive_paths[i:i+args.batch_size]
+        batch_names = archive_names[i:i+args.batch_size] 
+        title = titles[title_index]
+   
+        img_dir = img.make_tempdir('.tmp_img')
+        cbz_dir = cbz.make_tempdir(".tmp_cbz")
+
+        print(title)
+        print(batch, batch_names)
+        extract(batch, img_dir) # for file in input dir -> extracts to img_dir
+        print("Processing files...")
+        # moves img files to .tmp and removes empty folders they came from
+        handle_img_files(img_dir)
+        change_to_cbz(title, img_dir, cbz_dir) 
+        print("Using KCC to crop and correct the images")
+        use_kcc(title, kcc_output_folder, cbz_dir) 
+        title_index +=1
+
+        # filemetadata.main(anime, file_names, cover_count)
         img.close()
         cbz.close()
 
-
-if __name__ == "__main__":
-    main()
 
 # todo:
     # make lists sort (more accurate)
