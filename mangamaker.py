@@ -6,16 +6,6 @@ import time
 import utils.filemetadata as filemetadata
 import utils.tmp as tmp
 
-
-
-# song-of-the-night-walkers_c191 _ c200.5.zip
-def get_title(batch_names): 
-    name = batch_names[0].split("_")[0]
-    first = batch_names[0].split("_")[1]
-    last = batch_names[-1].split("_")[2]
-    return f"{name}_{first}_{last}"
-
-
 def extract(batch, img_dir): 
     # for file in archive(defualt) folder extract to .tmp
     for file in batch:
@@ -113,27 +103,46 @@ def get_names(input_folder):
     zip_path = os.path.join(input_folder)
     origional_names = sorted(os.listdir(zip_path))
     names = [name.replace(' ', '')[:-4] for name in origional_names]
-    folder_name = origional_names[0].split("_")[0].replace("-", " ")
-    return names, folder_name
+    folder_name = origional_names[0].split("_")[0]
+    search_query = origional_names[0].split("_")[0].replace("-", " ")
+    return names, folder_name, search_query
 
 
-def get_covers_needed(num_of_paths, batch_size):
-    while num_of_paths % batch_size != 0:
-        num_of_paths += 1
-    cover_ammount = num_of_paths // batch_size    
-    return cover_ammount
+def get_titles(names, batch_size):
+    lists = []
+    for i in range(0, len(names), batch_size):
+        lists.append(names[i:i+batch_size])
 
+    titles = []
+    for list in lists:
+        name = list[0].split("_")[0]
+        first = list[0].split("_")[1]
+        last = list[-1].split("_")[2]
+        titles.append( f"{name}_{first}_{last}")
+        
+    return titles
+
+def make_folder(path, name):
+    try:
+        path = os.path.join(path, name)
+        os.mkdir(path)
+    except FileExistsError:
+        print(f"{name} already exists")
+    return path
 
 
 def main(args):
     archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
-    archive_names, folder_name = get_names(args.input)
-
+    archive_names, folder_name, search_query = get_names(args.input)
+    titles = get_titles(archive_names, args.batch_size)
+    kcc_output_folder = make_folder(args.output, folder_name)
+    title_index = 0
     if args.imgs: 
-        filemetadata.main(str(folder_name).lower(), archive_names) 
+        title_index +=1
+        # get array of titles for filemetadata.py
+        filemetadata.main(anime=str(search_query).lower(), file_names=titles) 
         exit()
 
-    batch_size = args.batch_size
     # make volumes if doesn't already exist
     try:
         os.makedirs("volumes")
@@ -141,14 +150,15 @@ def main(args):
     except FileExistsError:
         print("The folder volumes already exists, moving on")
 
+    img = tmp.TempDir()
+    cbz = tmp.TempDir()
     for i in range(0, len(archive_paths), args.batch_size):
-        img = tmp.TempDir()
-        cbz = tmp.TempDir()
+        batch = archive_paths[i:i+args.batch_size]
+        batch_names = archive_names[i:i+args.batch_size] 
+        title = titles[title_index]
+   
         img_dir = img.make_tempdir('.tmp_img')
         cbz_dir = cbz.make_tempdir(".tmp_cbz")
-        batch = archive_paths[i:i+batch_size]
-        batch_names = archive_names[i:i+batch_size] 
-        title = get_title(batch_names)
 
         print(title)
         print(batch, batch_names)
@@ -158,10 +168,10 @@ def main(args):
         handle_img_files(img_dir)
         change_to_cbz(title, img_dir, cbz_dir) 
         print("Using KCC to crop and correct the images")
-        use_kcc(title, args.output, cbz_dir) 
+        use_kcc(title, kcc_output_folder, cbz_dir) 
+        title_index +=1
 
         # filemetadata.main(anime, file_names, cover_count)
-
         img.close()
         cbz.close()
 

@@ -62,10 +62,10 @@ def get_manga_url(anime):
                   potential_urls.append(manga.find_element(By.TAG_NAME, "a").get_attribute("href"))
           search_found = True
 
-      except Exception as e:  # Handle different exceptions appropriately
+      except Exception as e:  
           user_choice = input("Search failed. Retry (y/n) or enter new name: ").lower()
           if user_choice == 'n':
-              break  # Exit the loop if user doesn't want to retry
+              break 
           else:
               anime = user_choice
               search.clear()
@@ -80,13 +80,7 @@ def get_manga_url(anime):
 
 
 def get_img_urls(url):
-
     driver, wait = make_driver(url+"?tab=art")
-    # options = Options()
-    # options.add_argument('--headless')
-    # driver = webdriver.Chrome(options=options)
-    # driver.get(url+"?tab=art")
-    # wait = WebDriverWait(driver, 10) 
     wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "subtitle")))
     cover_urls = driver.find_elements(By.CSS_SELECTOR, "img[data-v-2763eefc]")
 
