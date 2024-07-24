@@ -9,7 +9,7 @@ def get_paths(path, files):
     return paths
 
 
-def good_ol_metadata(book_data, kcc_tmp, covers_tmp):
+def good_ol_metadata(book_data, kcc_tmp, covers_tmp, series):
     print(book_data)
     asin, publisher, publication_date, author, author_sort = book_data.values()
 
@@ -29,7 +29,8 @@ def good_ol_metadata(book_data, kcc_tmp, covers_tmp):
                    f" --date '{publication_date}'"
                    f" --cover {cover}"
                    f" --authors '{author}'"
-                   f" --author-sort '{author_sort}'")
+                   f" --author-sort '{author_sort}'"
+                   f" --series '{series}'")
         try:
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:

@@ -76,3 +76,10 @@ def get_folder_files(path):
   return [file for file in os.listdir(path) 
           if os.path.isfile(os.path.join(path, file))]
 
+
+def cammel_case(words):
+  split_words = words.split()
+  capital = [word.capitalize() for word in split_words]
+  capital_words = ' '.join(capital)
+  return capital_words
+  
