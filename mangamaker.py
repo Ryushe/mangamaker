@@ -7,6 +7,7 @@ import utils.get_covers as get_covers
 import utils.tmp as tmp
 import utils.get_amazon_metadata as amazon_metadata
 import utils.apply_metadata as apply_metadata
+from utils.utils import get_folder_files
 
 def extract(batch, img_dir): 
     # for file in archive(defualt) folder extract to .tmp
@@ -142,7 +143,7 @@ def move_to_output_folder():
 
 def main(args):
     payload = args.kcc
-    archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
+    archive_paths = get_folder_files(args.input)
     archive_names, folder_name, search_query = get_names(args.input)
     titles = get_titles(archive_names, args.batch_size)
     output_folder = make_folder(args.output, folder_name)
@@ -187,9 +188,11 @@ def main(args):
         img.close()
         cbz.close()
     book_data = amazon_metadata.main(search_query)
-    kcc_files = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp)
-    # move_to_output_folder(kcc_files, output_folder)
-    
+    kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp)
+    move_to_output_folder(kcc_paths, output_folder)
+
+    cover.close() 
+    kcc.close()
     
 
 # todo:

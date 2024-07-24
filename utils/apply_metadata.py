@@ -34,4 +34,4 @@ def good_ol_metadata(book_data, kcc_tmp, covers_tmp):
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
             print(f"Calibre exited with {e}") 
-    return kcc_files
+    return kcc_paths
