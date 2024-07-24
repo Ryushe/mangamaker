@@ -135,6 +135,8 @@ def main(anime: str, file_names):
   manga_url = get_manga_url(anime) # eventually have a way to pick which urls are best
   cover_urls = get_img_urls(manga_url)
   cover_paths = download_covers(cover_urls, sorted(file_names), cover_imgs)
+
+  # gets volumes so I cna use them
   return cover_paths, cover_imgs
     
 

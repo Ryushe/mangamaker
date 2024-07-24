@@ -7,6 +7,26 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
+# not using
+class Driver:
+  def __init__(self):
+    self.options = Options()
+    self.options = webdriver.ChromeOptions() 
+    self.options.add_argument("--log-level=3")
+    self.options.add_argument('--headless')
+    self.driver = webdriver.Chrome(options=self.options)
+  def search(self, url):
+    return self.driver.get(url)
+  def wait(self, time):
+    return WebDriverWait(self.driver, time)
+
+
+def test_driver(url, time=10):
+  driver = webdriver.Chrome()
+  driver.get(url)
+  wait = WebDriverWait(driver, time)
+  return driver, wait
+    
 def make_driver(url, time=10):
   options = Options()
   options = webdriver.ChromeOptions() 
