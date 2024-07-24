@@ -1,42 +1,11 @@
 # this file will handle the metadata of the file, eg: get the manga pics, apply those pics to the cbz file, add the amazin ibn number, author, etc
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 import requests
 import utils.tmp as tmp
 import re
 import os
-import itertools
-
-def is_similar(str1, str2, max_diff=2):
-  if abs(len(str1) - len(str2)) > max_diff:
-    return False
-  diff_count = 0
-  for i in range(min(len(str1), len(str2))):
-    if str1[i] != str2[i]:
-      diff_count += 1
-      if diff_count > max_diff:
-        return False
-  return True
-
-def non_specialify(word):
-  pattern = r"[^\w\s]"
-  non_special_word = re.sub(pattern, '', word)
-  return non_special_word
-
-def make_driver(url, time=10):
-  options = Options()
-  options = webdriver.ChromeOptions() 
-  options.add_argument("--log-level=3")
-  options.add_argument('--headless')
-  driver = webdriver.Chrome(options=options)
-  driver.get(url)
-  wait = WebDriverWait(driver, time)
-
-  return driver, wait
+from utils.utils import *
 
 def get_manga_url(anime): 
   driver, wait = make_driver("https://mangadex.org/")
@@ -79,22 +48,6 @@ def get_manga_url(anime):
     exit()
 
 
-def select_volume():
-  return
-
-def dearray(nested_list):
-  return list(itertools.chain.from_iterable(nested_list))
-
-def is_decimal(number: str):
-  if isinstance(number, str) and '.' in number:
-    return True
-  return False
-
-def has_decimal(numbers):
-  for num in numbers:
-    if isinstance(num, float):
-      return True
-  return False  
 
 def get_img_urls(url):
   driver, wait = make_driver(url+"?tab=art")
@@ -182,7 +135,7 @@ def main(anime: str, file_names):
   manga_url = get_manga_url(anime) # eventually have a way to pick which urls are best
   cover_urls = get_img_urls(manga_url)
   cover_paths = download_covers(cover_urls, sorted(file_names), cover_imgs)
-  return cover_paths
+  return cover_paths, cover_imgs
     
 
     # need to download the cover and then edit the meta of the volumes 

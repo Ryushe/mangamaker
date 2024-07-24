@@ -1,9 +1,8 @@
-array = [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+import os
+import subprocess
+def good_ol_metadata():
+    path = os.path.join(os.getcwd(), "utils", "metadata.py")
+    command = f"calibre-debug {path}"
+    subprocess.run(command, shell=True, check=True)
 
-def has_decimal(numbers):
-  for num in numbers:
-    if isinstance(num, float):
-      return True
-  return False  
-
-print(has_decimal(array))
+good_ol_metadata()

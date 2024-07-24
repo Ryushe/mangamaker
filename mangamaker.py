@@ -3,7 +3,7 @@ import patoolib
 import os
 import shutil
 import time
-import utils.filemetadata as filemetadata
+import utils.get_covers as get_covers
 import utils.tmp as tmp
 
 def extract(batch, img_dir): 
@@ -130,6 +130,11 @@ def make_folder(path, name):
         print(f"{name} already exists")
     return path
 
+def good_ol_metadata():
+    path = os.path.join(os.getcwd(), "utils", "metadata.py")
+    command = f"calibre-debug {path}"
+    subprocess.run(command, shell=True, check=True)
+
 
 def main(args):
     payload = args.kcc
@@ -140,7 +145,7 @@ def main(args):
     title_index = 0
     if args.imgs: 
         # get array of titles for filemetadata.py
-        filemetadata.main(anime=search_query.lower(), file_names=titles) 
+        get_covers.main(anime=search_query.lower(), file_names=titles) 
         exit()
 
     # make volumes if doesn't already exist
@@ -152,7 +157,7 @@ def main(args):
 
     img = tmp.TempDir()
     cbz = tmp.TempDir()
-    filemetadata.main(anime=search_query.lower(), file_names=titles) 
+    cover_paths, covers_tmp = get_covers.main(anime=search_query.lower(), file_names=titles) 
     for i in range(0, len(archive_paths), args.batch_size):
         batch = archive_paths[i:i+args.batch_size]
         batch_names = archive_names[i:i+args.batch_size] 
@@ -172,10 +177,8 @@ def main(args):
         use_kcc(title, kcc_output_folder, cbz_dir, payload) 
         title_index +=1
 
-        # filemetadata.main(anime, file_names, cover_count)
         img.close()
         cbz.close()
-
 
 # todo:
     # make lists sort (more accurate)
