@@ -88,7 +88,7 @@ def get_indexes(file_names):
   start_index = max(1, min(extracted_int) // 50) # if want to make by chapts change to chapters_per
   end_index = start_index + len(file_names)
   
-  return start_index-1, end_index
+  return start_index, end_index
 
 
 # makes cover_urls and filenames even in length and returns items based on the volume numbers in the file names

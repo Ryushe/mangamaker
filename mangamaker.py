@@ -106,10 +106,11 @@ def get_names(input_folder):
     origional_names = sorted(os.listdir(zip_path))
     names = [name.replace(' ', '')[:-4] for name in origional_names]
     folder_name = origional_names[0].split("_")[0]
+    search_query = folder_name.replace('-', ' ')
 
-    words = origional_names[0].split("_")[0].replace("-", " ").split()
-    capital_words = [word.capitalize() for word in words]
-    search_query = ' '.join(capital_words)
+    # words = origional_names[0].split("_")[0].replace("-", " ").split()
+    # capital_words = [word.capitalize() for word in words]
+    # search_query = ' '.join(capital_words)
     return names, folder_name, str(search_query)
 
 

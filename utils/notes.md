@@ -27,7 +27,7 @@ Currenly fixing:
 
 fixed:
 - get_amazon_metadata search not working ;-;
-- capital letters so hopefully more accurate
+- sorted(get_folder_files(kcc_tmp)) -----> bug
 
 known bugs:
 - get_covers sometimes errors out with no covers...
