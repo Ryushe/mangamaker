@@ -1,6 +1,6 @@
 keeping a list of what I want to do:
 
-
+`pipreqs .` -> gens req.txt
 
 amazon meta.py:
 - have data based on volumes

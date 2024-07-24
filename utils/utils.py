@@ -83,3 +83,55 @@ def cammel_case(words):
   capital_words = ' '.join(capital)
   return capital_words
   
+
+class Search():
+  def __init__(self, driver=None):
+    if driver and type(driver) != str: 
+      self.driver = driver
+    elif driver == "test":
+      self.driver = webdriver.Chrome()
+    else:
+      self.options = Options()
+      self.options = webdriver.ChromeOptions() 
+      self.options.add_argument("--log-level=3")
+      self.options.add_argument('--headless')
+      self.driver = webdriver.Chrome(options=self.options)
+          
+  def set_url(self, url):
+      self.driver.get(url)
+      print(self.driver.title)
+
+  def button_search(self, searchbar_id, button_id, search_query, method=By.ID):
+    search = self.driver.find_element(method, searchbar_id)
+    search.clear()
+    search.send_keys(search_query)
+    button = self.driver.find_element(method, button_id)
+    button.click()
+  
+  def wait_for(self, method, id, time=10):
+    wait = WebDriverWait(self.driver, time)
+    wait.until(EC.presence_of_element_located((method, id)))
+  
+  def wait_for_all(self, method, ids, time=10):
+    wait = WebDriverWait(self.driver, time)
+    wait.until(EC.presence_of_all_elements_located((method, ids)))
+  
+  def get_containers(self, id, method=By.CLASS_NAME):
+    containers = self.driver.find_elements(method, id)
+    return containers
+
+  def quit(self):
+    self.driver.quit()
+
+
+    
+def make_driver(url, time=10):
+  options = Options()
+  options = webdriver.ChromeOptions() 
+  options.add_argument("--log-level=3")
+  options.add_argument('--headless')
+  driver = webdriver.Chrome(options=options)
+  driver.get(url)
+  wait = WebDriverWait(driver, time)
+
+  return driver, wait

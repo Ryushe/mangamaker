@@ -138,6 +138,27 @@ def make_folder(path, name):
 def move_to_folder(files, output):
     return
 
+
+def start_points(args):
+    # handling start points
+    archive_names, folder_name, search_query = get_names(args.input)
+    titles = get_titles(archive_names, args.batch_size)
+    if args.imgs: 
+        # get array of titles for filemetadata.py
+        get_covers.main(anime=search_query, file_names=titles) 
+        exit()
+    if args.metadata:
+        kcc = tmp.TempDir()
+        kcc_tmp = kcc.make_tempdir('.tmp_kcc')
+        cover, covers_tmp = get_covers.main(anime=search_query, file_names=titles) 
+        output_folder = make_folder(args.output, folder_name)
+
+        book_data = amazon_metadata.main(search_query)
+        kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp, cammel_case(words=search_query))
+        move_to_folder(kcc_paths, output_folder) 
+        exit()
+
+
 def main(args):
     payload = args.kcc
     archive_paths = get_folder_files(args.input)
@@ -145,10 +166,10 @@ def main(args):
     titles = get_titles(archive_names, args.batch_size)
     output_folder = make_folder(args.output, folder_name)
     title_index = 0
-    if args.imgs: 
-        # get array of titles for filemetadata.py
-        get_covers.main(anime=search_query, file_names=titles) 
-        exit()
+
+    # call different things based on args
+    start_points(args)
+
 
     # make volumes if doesn't already exist
     try:

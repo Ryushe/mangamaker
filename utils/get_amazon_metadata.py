@@ -7,25 +7,19 @@ from selenium.webdriver.chrome.options import Options
 from utils.utils import *
 
 def get_manga_url(anime):
-    driver, wait = make_driver("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
     search_found = False
     potential_urls = []
 
     while not search_found:
         search_query = f"{anime}"
         try:
-            wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
-            title = driver.title
-            print(title)
+            amazon = Search()
+            amazon.set_url("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
+            amazon.wait_for(By.ID, "twotabsearchtextbox")
+            amazon.button_search("twotabsearchtextbox", "nav-search-submit-button", search_query)
+            amazon.wait_for_all(By.CLASS_NAME, "puisg-col-inner")
+            amazon_containers = amazon.get_containers("puisg-col-inner")
 
-            search = driver.find_element(By.ID, "twotabsearchtextbox")
-            search.clear()
-            search.send_keys(search_query)
-            search_button = driver.find_element(By.ID, "nav-search-submit-button")
-            search_button.click()
-
-            wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "puisg-col-inner")))
-            amazon_containers = driver.find_elements(By.CLASS_NAME, "puisg-col-inner")
 
             for container in amazon_containers:
                 name = container.find_element(By.TAG_NAME, "span").text
@@ -44,7 +38,7 @@ def get_manga_url(anime):
             else:
                 anime = user_choice
     print("Urls successfully found")
-    driver.quit()
+    amazon.quit()
     try:
         return link
     except IndexError:
