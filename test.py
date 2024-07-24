@@ -1,38 +1,51 @@
-import utils.tmp as tmp
 from utils.utils import *
+def main(anime):
+    search_found = False
+    while not search_found:
+        search_query = f"{anime}"
+        try:
+            # wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
+            # title = driver.title
+            # print(title)
 
-def get_paths(path, files):
-    paths = []
-    for file in files:
-        paths.append(os.path.join(path, file))
-    return paths
+            # search = driver.find_element(By.ID, "twotabsearchtextbox")
+            # search.clear()
+            # search.send_keys(search_query)
+            # search_button = driver.find_element(By.ID, "nav-search-submit-button")
+            # search_button.click()
 
-def create_txt_files(directory, num_files, content):
-  """Creates multiple text files in a specified directory.
+            # wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "puisg-col-inner")))
+            # amazon_containers = driver.find_elements(By.CLASS_NAME, "puisg-col-inner")
+            amazon = Search()
+            amazon.set_url("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
+            amazon.wait_for(By.ID, "twotabsearchtextbox")
+            amazon.button_search("twotabsearchtextbox", "nav-search-submit-button", search_query)
+            amazon.wait_for_all(By.CLASS_NAME, "puisg-col-inner")
+            amazon_containers = amazon.get_containers("puisg-col-inner")
 
-  Args:
-    directory: The path to the directory where files will be created.
-    num_files: The number of files to create.
-    content: The content to be written to each file.
-  """
+            for container in amazon_containers:
+                name = container.find_element(By.TAG_NAME, "span").text
+                filtered_name = non_specialify(name.lower().split(' vol')[0])
+                if is_similar(anime, filtered_name):
+                    print(f"{anime} ==== {filtered_name}")
+                    a_tags = container.find_element(By.TAG_NAME, "a")
+                    link = a_tags.get_attribute("href")
+                    break
+            search_found = True
 
-  if not os.path.exists(directory):
-    os.makedirs(directory)
+        except Exception as e:  
+            user_choice = input("Search failed. Retry (y/n) or enter new name: ").lower()
+            if user_choice == 'n':
+                break 
+            else:
+                anime = user_choice
+        print("Urls successfully found")
+        amazon.quit()
+        try:
+            return link
+        except IndexError:
+            print("Cant find that anime")
+            print("Relaunch using the flag --imgs")
+            exit()
 
-  for i in range(num_files):
-    filename = f"file_{i+1}.txt"
-    file_path = os.path.join(directory, filename)
-    with open(file_path, "w") as f:
-      f.write(content)
-
-nums = [1,2,3,4]
-
-bob = tmp.TempDir()
-bob_path = bob.make_tempdir("booba")
-create_txt_files(bob_path, 4, '')
-files = get_folder_files(bob_path)
-
-paths = get_paths(bob_path, files)
-for num, file in zip(nums, paths):
-  print(num, file)
-
+print(main("berserk"))

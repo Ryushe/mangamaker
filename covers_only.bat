@@ -1,1 +1,1 @@
-python .\cli.py --imgs
+python cli.py --use covers

@@ -7,7 +7,7 @@ import utils.get_covers as get_covers
 import utils.tmp as tmp
 import utils.get_amazon_metadata as amazon_metadata
 import utils.apply_metadata as apply_metadata
-from utils.utils import get_folder_files
+from utils.utils import get_folder_files, cammel_case
 
 def extract(batch, img_dir): 
     # for file in archive(defualt) folder extract to .tmp
@@ -109,10 +109,7 @@ def get_names(input_folder):
     folder_name = origional_names[0].split("_")[0]
     search_query = folder_name.replace('-', ' ')
 
-    # words = origional_names[0].split("_")[0].replace("-", " ").split()
-    # capital_words = [word.capitalize() for word in words]
-    # search_query = ' '.join(capital_words)
-    return names, folder_name, str(search_query)
+    return names, folder_name, str(search_query).lower()
 
 
 def get_titles(names, batch_size):
@@ -138,21 +135,47 @@ def make_folder(path, name):
     return path
 
 
-def move_folder(files, output):
+def move_to_folder(files, output):
     return
 
+
+def start_points(args):
+    # handling start points
+    archive_names, folder_name, search_query = get_names(args.input)
+    titles = get_titles(archive_names, args.batch_size)
+    option = str(args.use).replace("'","").replace("]", "").replace("[", "").lower()
+    if option == 'covers': 
+        # get array of titles for filemetadata.py
+        get_covers.main(anime=search_query, file_names=titles) 
+        exit()
+    if option == 'meta':
+        tmps = tmp.TempDir()
+        kcc_tmp = tmps.get_path('.tmp_kcc')
+        covers_tmp = tmps.get_path('.tmp_cover')
+        output_folder = make_folder(args.output, folder_name)
+
+        book_data = amazon_metadata.main(search_query)
+        kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp, cammel_case(words=search_query))
+        move_to_folder(kcc_paths, output_folder) 
+        exit()
+    else: 
+        print(f"{option} not an option try again")
+
+
 def main(args):
+
+    # call different things based on args
+    if args.use:
+        start_points(args)
+        exit()
+
     payload = args.kcc
     archive_paths = get_folder_files(args.input)
     archive_names, folder_name, search_query = get_names(args.input)
     titles = get_titles(archive_names, args.batch_size)
     output_folder = make_folder(args.output, folder_name)
     title_index = 0
-    if args.imgs: 
-        # get array of titles for filemetadata.py
-        get_covers.main(anime=search_query.lower(), file_names=titles) 
-        exit()
-
+    
     # make volumes if doesn't already exist
     try:
         os.makedirs("volumes")
@@ -165,7 +188,7 @@ def main(args):
     kcc = tmp.TempDir()
     kcc_tmp = kcc.make_tempdir('.tmp_kcc')
     #covers_tmp -> same as above, use to close dir
-    cover, covers_tmp = get_covers.main(anime=search_query.lower(), file_names=titles) 
+    cover, covers_tmp = get_covers.main(anime=search_query, file_names=titles) 
     for i in range(0, len(archive_paths), args.batch_size):
         batch = archive_paths[i:i+args.batch_size]
         batch_names = archive_names[i:i+args.batch_size] 
@@ -188,8 +211,8 @@ def main(args):
         img.close()
         cbz.close()
     book_data = amazon_metadata.main(search_query)
-    kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp)
-    move_folder(kcc_paths, output_folder)
+    kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp, cammel_case(words=search_query))
+    move_to_folder(kcc_paths, output_folder)
 
     cover.close() 
     kcc.close()

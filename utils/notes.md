@@ -1,10 +1,13 @@
 keeping a list of what I want to do:
 
-
+`pipreqs .` -> gens req.txt
 
 amazon meta.py:
 - have data based on volumes
 - get book data if fails
+
+get_covers:
+- make compare name in potential urls list, one closest gets added
 
 general:
 - resume anywhere 

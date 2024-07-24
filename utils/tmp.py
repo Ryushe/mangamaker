@@ -12,9 +12,10 @@ class TempDir:
             print("tmp exists bozo")
 
     def make_tempdir(self, dirname):
-        self.temp_dir = os.path.join(os.getcwd(), self.tmp, dirname)
+        self.dirname = dirname
+        self.temp_dir = os.path.join(os.getcwd(), self.tmp, self.dirname)
         try:
-            print(f"Creating tempdir {dirname}")
+            print(f"Creating tempdir {self.dirname}")
             os.mkdir(self.temp_dir)
         except FileExistsError:
             print(f"Clearing {dirname} (Because it exists already)")
@@ -22,10 +23,19 @@ class TempDir:
                 shutil.rmtree(self.temp_dir)
                 os.mkdir(self.temp_dir)
             except:
-                print(f"Please manually remove {dirname} before continuing")
+                print(f"Please manually remove {self.dirname} before continuing")
                 exit()
         return self.temp_dir
     
+    def get_path(self, dirname=''):
+        try:
+            return self.temp_dir
+        except:
+            if dirname:
+                self.temp_dir = os.path.join(os.getcwd(), self.tmp, dirname)
+                return self.temp_dir
+            else: print("please add a dirname to get_path")
+        
     def close(self):
         # gets the path of the temp folder
         temp_path = os.path.realpath(self.temp_dir)

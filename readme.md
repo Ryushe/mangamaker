@@ -1,13 +1,16 @@
 Used in proj:  
 patoolib, shutil, KCC, patool, PySide6, Pillow, psutil, requests, python-slugify, raven, mozjpeg-lossless-optimization, natsort, distro, selenium
 
+External dependencies not in req.txt: Calibre
+
 # Instructions
 1. `git clone https://github.com/Ryushe/mangamaker.git`
 2. `pip install -r requirements.txt`, this will install all requirements needed 
-3. move manga .zip files into input folder (default: archives)
+3. install calibre [here](https://calibre-ebook.com/download)
+4. move manga .zip files into input folder (default: archives)
     - can find manga files [here](https://mangakatana.com/)
     - note: if archives folder isn't there, just make one in the project root directory
-4. `python mangamaker.py [options]` or `run.bat`
+5. `python mangamaker.py [options]` or `run.bat`
 
 Note: If you have a diferent version you may want to customize the kcc payload  
 - `--kcc <kcc options>`
