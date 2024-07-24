@@ -1,5 +1,6 @@
 import itertools
 import re
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -53,7 +54,7 @@ def is_similar(str1, str2, max_diff=2):
 def non_specialify(word):
   pattern = r"[^\w\s]"
   non_special_word = re.sub(pattern, '', word)
-  return non_special_word
+  return non_special_word.replace(',', '')
 
 
 def dearray(nested_list):
@@ -69,4 +70,9 @@ def has_decimal(numbers):
     if isinstance(num, float):
       return True
   return False  
+
+def get_folder_files(path):
+
+  return [file for file in os.listdir(path) 
+          if os.path.isfile(os.path.join(path, file))]
 

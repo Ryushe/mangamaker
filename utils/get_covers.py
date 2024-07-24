@@ -56,9 +56,8 @@ def get_img_urls(url):
   volume_names = driver.find_elements(By.CSS_SELECTOR, "span[data-v-2763eefc]")
   volume_nums = dearray([extract_numbers(num.text) for num in volume_names]) # hehe
 
-  print(volume_nums)
   new_cover_urls = []
-  for i in volume_nums: 
+  for i in range(0,len(volume_nums)): 
     if has_decimal(volume_nums):
       try:
         if is_decimal(str(volume_nums[i])):
@@ -107,11 +106,9 @@ def correctly_indexed_cover_urls(file_names, cover_urls):
     return cover_urls
 
  
-def download_covers(cover_urls, file_names, cover_imgs):
+def download_covers(cover_urls, file_names, cover_dir):
   # need to download as jumber of covers and then give the name from file names
-  cover_dir = cover_imgs.make_tempdir('.tmp_covers')
   cover_urls = correctly_indexed_cover_urls(file_names, cover_urls)
-  print(cover_urls)
 
   print("Downloading covers")
   cover_paths = []
@@ -130,14 +127,15 @@ def download_covers(cover_urls, file_names, cover_imgs):
 
 
 def main(anime: str, file_names):
-  cover_imgs = tmp.TempDir()
+  cover = tmp.TempDir()
+  cover_dir = cover.make_tempdir(".tmp_covers")
 
   manga_url = get_manga_url(anime) # eventually have a way to pick which urls are best
   cover_urls = get_img_urls(manga_url)
-  cover_paths = download_covers(cover_urls, sorted(file_names), cover_imgs)
+  cover_paths = download_covers(cover_urls, sorted(file_names), cover_dir)
 
   # gets volumes so I cna use them
-  return cover_paths, cover_imgs
+  return cover, cover_dir
     
 
     # need to download the cover and then edit the meta of the volumes 

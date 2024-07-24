@@ -5,6 +5,8 @@ import shutil
 import time
 import utils.get_covers as get_covers
 import utils.tmp as tmp
+import utils.get_amazon_metadata as amazon_metadata
+import utils.apply_metadata as apply_metadata
 
 def extract(batch, img_dir): 
     # for file in archive(defualt) folder extract to .tmp
@@ -104,7 +106,10 @@ def get_names(input_folder):
     origional_names = sorted(os.listdir(zip_path))
     names = [name.replace(' ', '')[:-4] for name in origional_names]
     folder_name = origional_names[0].split("_")[0]
-    search_query = origional_names[0].split("_")[0].replace("-", " ")
+
+    words = origional_names[0].split("_")[0].replace("-", " ").split()
+    capital_words = [word.capitalize() for word in words]
+    search_query = ' '.join(capital_words)
     return names, folder_name, str(search_query)
 
 
@@ -130,18 +135,16 @@ def make_folder(path, name):
         print(f"{name} already exists")
     return path
 
-def good_ol_metadata():
-    path = os.path.join(os.getcwd(), "utils", "metadata.py")
-    command = f"calibre-debug {path}"
-    subprocess.run(command, shell=True, check=True)
 
+def move_to_output_folder():
+    return
 
 def main(args):
     payload = args.kcc
     archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
     archive_names, folder_name, search_query = get_names(args.input)
     titles = get_titles(archive_names, args.batch_size)
-    kcc_output_folder = make_folder(args.output, folder_name)
+    output_folder = make_folder(args.output, folder_name)
     title_index = 0
     if args.imgs: 
         # get array of titles for filemetadata.py
@@ -157,7 +160,10 @@ def main(args):
 
     img = tmp.TempDir()
     cbz = tmp.TempDir()
-    cover_paths, covers_tmp = get_covers.main(anime=search_query.lower(), file_names=titles) 
+    kcc = tmp.TempDir()
+    kcc_tmp = kcc.make_tempdir('.tmp_kcc')
+    #covers_tmp -> same as above, use to close dir
+    cover, covers_tmp = get_covers.main(anime=search_query.lower(), file_names=titles) 
     for i in range(0, len(archive_paths), args.batch_size):
         batch = archive_paths[i:i+args.batch_size]
         batch_names = archive_names[i:i+args.batch_size] 
@@ -174,11 +180,16 @@ def main(args):
         handle_img_files(img_dir)
         change_to_cbz(title, img_dir, cbz_dir) 
         print("Using KCC to crop and correct the images")
-        use_kcc(title, kcc_output_folder, cbz_dir, payload) 
+        use_kcc(title, kcc_tmp, cbz_dir, payload) 
         title_index +=1
 
         img.close()
         cbz.close()
+    book_data = amazon_metadata.main(search_query)
+    kcc_files = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp)
+    # move_to_output_folder(kcc_files, output_folder)
+    
+    
 
 # todo:
     # make lists sort (more accurate)

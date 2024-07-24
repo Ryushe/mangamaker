@@ -7,12 +7,12 @@ from selenium.webdriver.chrome.options import Options
 from utils.utils import *
 
 def get_manga_url(anime):
-    potential_urls = []
     driver, wait = make_driver("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
     search_found = False
+    potential_urls = []
 
     while not search_found:
-        search_query = f"{anime} vol manga"
+        search_query = f"{anime}"
         try:
             wait.until(EC.presence_of_element_located((By.ID, "twotabsearchtextbox")))
             title = driver.title
@@ -29,7 +29,7 @@ def get_manga_url(anime):
 
             for container in amazon_containers:
                 name = container.find_element(By.TAG_NAME, "span").text
-                filtered_name = name.split(',')[0].lower()
+                filtered_name = non_specialify(name.lower().split(' vol')[0])
                 if is_similar(anime, filtered_name):
                     print(f"{anime} ==== {filtered_name}")
                     a_tags = container.find_element(By.TAG_NAME, "a")
@@ -53,14 +53,14 @@ def get_manga_url(anime):
         exit()
 
 def matches(text):
-    options = ["asin", "publisher", "publication date", "print length"]
+    options = ["asin", "publisher", "publication date"] # could add print length
     text = text.lower()
     for option in options:
         if option in text:
             return option
 
 def metadata_time(url):
-    driver, wait = test_driver(url)
+    driver, wait = make_driver(url)
     wait.until(EC.presence_of_element_located((By.ID, "detailBullets_feature_div")))
     author_text = driver.find_element(By.XPATH, "//span[@class='author notFaded']").text
     author = author_text.split(' ')[:-1]
@@ -83,6 +83,10 @@ def metadata_time(url):
     book_details.update({"Author":author})
     book_details.update({"Author sort":author_sort})
 
+    if book_details:
+        print("Got book details")
+        print(book_details)
+    else: print("book details not found")
     return(book_details)
 
 
