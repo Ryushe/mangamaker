@@ -6,6 +6,9 @@ amazon meta.py:
 - have data based on volumes
 - get book data if fails
 
+get_covers:
+- make compare name in potential urls list, one closest gets added
+
 general:
 - resume anywhere 
 - make tmp dir, if finds files of the same type working on resumes instead of removing them

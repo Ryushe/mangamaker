@@ -28,7 +28,8 @@ def get_manga_url(anime):
               web_manga_name = manga.find_element(By.TAG_NAME, "div").text.lower()
               no_special_char = non_specialify(web_manga_name)
               if(is_similar(anime, no_special_char)):
-                  potential_urls.append(manga.find_element(By.TAG_NAME, "a").get_attribute("href"))
+                print(anime, no_special_char)
+                potential_urls.append(manga.find_element(By.TAG_NAME, "a").get_attribute("href"))
           search_found = True
 
       except Exception as e:  

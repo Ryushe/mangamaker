@@ -25,21 +25,17 @@ class TempDir:
             except:
                 print(f"Please manually remove {self.dirname} before continuing")
                 exit()
-            # return self.temp_dir
-        except:
-            print("error making dir")
-            exit()
-
         return self.temp_dir
     
-    def clear_tmp(self):
+    def get_path(self, dirname=''):
         try:
-            shutil.rmtree(self.temp_dir)
-            os.mkdir(self.temp_dir)
+            return self.temp_dir
         except:
-            print(f"No tmp dir to clear")
-
-    
+            if dirname:
+                self.temp_dir = os.path.join(os.getcwd(), self.tmp, dirname)
+                return self.temp_dir
+            else: print("please add a dirname to get_path")
+        
     def close(self):
         # gets the path of the temp folder
         temp_path = os.path.realpath(self.temp_dir)

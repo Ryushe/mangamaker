@@ -10,9 +10,8 @@ def get_paths(path, files):
 
 
 def good_ol_metadata(book_data, kcc_tmp, covers_tmp, series):
-    print(book_data)
     asin, publisher, publication_date, author, author_sort = book_data.values()
-
+    print(f"editing metadata of {series}")
 
     kcc_files =  sorted(get_folder_files(kcc_tmp))
     cover_files = sorted(get_folder_files(covers_tmp))
@@ -33,6 +32,7 @@ def good_ol_metadata(book_data, kcc_tmp, covers_tmp, series):
                    f" --series '{series}'")
         try:
             subprocess.run(command, shell=True, check=True)
+            print(f"file: {file} edited properly")
         except subprocess.CalledProcessError as e:
-            print(f"Calibre exited with {e}") 
+            print(f"file: {file} not edited properly")
     return kcc_paths
