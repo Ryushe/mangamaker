@@ -1,42 +1,11 @@
 # this file will handle the metadata of the file, eg: get the manga pics, apply those pics to the cbz file, add the amazin ibn number, author, etc
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 import requests
 import utils.tmp as tmp
 import re
 import os
-import itertools
-
-def is_similar(str1, str2, max_diff=2):
-  if abs(len(str1) - len(str2)) > max_diff:
-    return False
-  diff_count = 0
-  for i in range(min(len(str1), len(str2))):
-    if str1[i] != str2[i]:
-      diff_count += 1
-      if diff_count > max_diff:
-        return False
-  return True
-
-def non_specialify(word):
-  pattern = r"[^\w\s]"
-  non_special_word = re.sub(pattern, '', word)
-  return non_special_word
-
-def make_driver(url, time=10):
-  options = Options()
-  options = webdriver.ChromeOptions() 
-  options.add_argument("--log-level=3")
-  options.add_argument('--headless')
-  driver = webdriver.Chrome(options=options)
-  driver.get(url)
-  wait = WebDriverWait(driver, time)
-
-  return driver, wait
+from utils.utils import *
 
 def get_manga_url(anime): 
   driver, wait = make_driver("https://mangadex.org/")
@@ -79,22 +48,6 @@ def get_manga_url(anime):
     exit()
 
 
-def select_volume():
-  return
-
-def dearray(nested_list):
-  return list(itertools.chain.from_iterable(nested_list))
-
-def is_decimal(number: str):
-  if isinstance(number, str) and '.' in number:
-    return True
-  return False
-
-def has_decimal(numbers):
-  for num in numbers:
-    if isinstance(num, float):
-      return True
-  return False  
 
 def get_img_urls(url):
   driver, wait = make_driver(url+"?tab=art")
@@ -103,9 +56,8 @@ def get_img_urls(url):
   volume_names = driver.find_elements(By.CSS_SELECTOR, "span[data-v-2763eefc]")
   volume_nums = dearray([extract_numbers(num.text) for num in volume_names]) # hehe
 
-  print(volume_nums)
   new_cover_urls = []
-  for i in volume_nums: 
+  for i in range(0,len(volume_nums)): 
     if has_decimal(volume_nums):
       try:
         if is_decimal(str(volume_nums[i])):
@@ -136,7 +88,7 @@ def get_indexes(file_names):
   start_index = max(1, min(extracted_int) // 50) # if want to make by chapts change to chapters_per
   end_index = start_index + len(file_names)
   
-  return start_index-1, end_index
+  return start_index, end_index
 
 
 # makes cover_urls and filenames even in length and returns items based on the volume numbers in the file names
@@ -154,11 +106,9 @@ def correctly_indexed_cover_urls(file_names, cover_urls):
     return cover_urls
 
  
-def download_covers(cover_urls, file_names, cover_imgs):
+def download_covers(cover_urls, file_names, cover_dir):
   # need to download as jumber of covers and then give the name from file names
-  cover_dir = cover_imgs.make_tempdir('.tmp_covers')
   cover_urls = correctly_indexed_cover_urls(file_names, cover_urls)
-  print(cover_urls)
 
   print("Downloading covers")
   cover_paths = []
@@ -177,12 +127,15 @@ def download_covers(cover_urls, file_names, cover_imgs):
 
 
 def main(anime: str, file_names):
-  cover_imgs = tmp.TempDir()
+  cover = tmp.TempDir()
+  cover_dir = cover.make_tempdir(".tmp_covers")
 
   manga_url = get_manga_url(anime) # eventually have a way to pick which urls are best
   cover_urls = get_img_urls(manga_url)
-  cover_paths = download_covers(cover_urls, sorted(file_names), cover_imgs)
-  return cover_paths
+  cover_paths = download_covers(cover_urls, sorted(file_names), cover_dir)
+
+  # gets volumes so I cna use them
+  return cover, cover_dir
     
 
     # need to download the cover and then edit the meta of the volumes 

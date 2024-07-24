@@ -1,6 +1,6 @@
 /__pycache__
 /example_files
-test
+test*
 /.tmp
 /archives/*
 .*
