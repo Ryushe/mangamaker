@@ -138,7 +138,7 @@ def make_folder(path, name):
     return path
 
 
-def move_to_output_folder():
+def move_folder(files, output):
     return
 
 def main(args):
@@ -189,7 +189,7 @@ def main(args):
         cbz.close()
     book_data = amazon_metadata.main(search_query)
     kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp)
-    move_to_output_folder(kcc_paths, output_folder)
+    move_folder(kcc_paths, output_folder)
 
     cover.close() 
     kcc.close()
