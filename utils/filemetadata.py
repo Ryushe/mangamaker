@@ -9,7 +9,7 @@ import requests
 import utils.tmp as tmp
 import re
 import os
-
+import itertools
 
 def is_similar(str1, str2, max_diff=2):
   if abs(len(str1) - len(str2)) > max_diff:
@@ -79,29 +79,64 @@ def get_manga_url(anime):
     exit()
 
 
+def select_volume():
+  return
+
+def dearray(nested_list):
+  return list(itertools.chain.from_iterable(nested_list))
+
+def is_decimal(number: str):
+  if isinstance(number, str) and '.' in number:
+    return True
+  return False
+
+def has_decimal(numbers):
+  for num in numbers:
+    if isinstance(num, float):
+      return True
+  return False  
+
 def get_img_urls(url):
-    driver, wait = make_driver(url+"?tab=art")
-    wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "subtitle")))
-    cover_urls = driver.find_elements(By.CSS_SELECTOR, "img[data-v-2763eefc]")
+  driver, wait = make_driver(url+"?tab=art")
+  wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "subtitle")))
+  cover_urls = driver.find_elements(By.CSS_SELECTOR, "img[data-v-2763eefc]")[1:]
+  volume_names = driver.find_elements(By.CSS_SELECTOR, "span[data-v-2763eefc]")
+  volume_nums = dearray([extract_numbers(num.text) for num in volume_names]) # hehe
 
-    img_srcs = []
-    for img in cover_urls:
-        img_srcs.append(img.get_attribute("src"))
-    driver.quit()
-    return img_srcs[1:] # removes the shown cover (when u search the item)
-    
+  print(volume_nums)
+  new_cover_urls = []
+  for i in volume_nums: 
+    if has_decimal(volume_nums):
+      try:
+        if is_decimal(str(volume_nums[i])):
+          new_cover_urls.append(cover_urls[i].get_attribute("src"))
+      except:
+        print("fuck uself")
+    else: 
+      new_cover_urls.append(cover_urls[i].get_attribute("src"))
+  driver.quit()
+  return new_cover_urls
 
-def extract_numbers(string):
-  numbers = re.findall(r'\d+', string)
-  return [int(num) for num in numbers]
+
+def extract_numbers(string): # takes 1 arg no list
+  decimal = False
+  numbers = re.findall(r'-?\d+\.?\d*', string)
+  for num in numbers:
+    if is_decimal(num):
+      decimal = True
+  if decimal:
+    return [float(num) for num in numbers]
+  else:
+    return [int(num) for num in numbers]
   
 
 def get_indexes(file_names):
   extracted_int = extract_numbers(file_names[0])
-  chapters_per = max(extracted_int) - min(extracted_int) + 1
-  start_index = min(extracted_int) // chapters_per  
+  chapters_per = max(extracted_int) - (min(extracted_int) - 1)
+  start_index = max(1, min(extracted_int) // 50) # if want to make by chapts change to chapters_per
   end_index = start_index + len(file_names)
-  return start_index, end_index
+  
+  return start_index-1, end_index
 
 
 # makes cover_urls and filenames even in length and returns items based on the volume numbers in the file names
@@ -123,8 +158,9 @@ def download_covers(cover_urls, file_names, cover_imgs):
   # need to download as jumber of covers and then give the name from file names
   cover_dir = cover_imgs.make_tempdir('.tmp_covers')
   cover_urls = correctly_indexed_cover_urls(file_names, cover_urls)
+  print(cover_urls)
 
-  print("Donwloading covers")
+  print("Downloading covers")
   cover_paths = []
   for cover, file in zip(cover_urls, file_names):
     try: 
@@ -140,12 +176,13 @@ def download_covers(cover_urls, file_names, cover_imgs):
   return sorted(cover_paths)
 
 
-def main(anime, file_names):
+def main(anime: str, file_names):
   cover_imgs = tmp.TempDir()
 
   manga_url = get_manga_url(anime) # eventually have a way to pick which urls are best
   cover_urls = get_img_urls(manga_url)
   cover_paths = download_covers(cover_urls, sorted(file_names), cover_imgs)
+  return cover_paths
     
 
     # need to download the cover and then edit the meta of the volumes 

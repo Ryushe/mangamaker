@@ -89,13 +89,13 @@ def change_to_cbz(title, img_dir, cbz_dir):
         print("Error making .cbz file")
 
 
-def use_kcc(title, output, cbz_dir):
+def use_kcc(title, output, cbz_dir, payload):
     # output = os.path.join(os.getcwd(),output)
     output = os.path.abspath(output)
     print('output = '+output)
     input = os.path.join(cbz_dir,title+'.cbz')
     print('input = '+input)
-    command = f'python manga_format_maker\\kcc-c2e.py -u --croppingpower 0.80 --manga-style -o {output} {input}'
+    command = f'python manga_format_maker\\kcc-c2e.py {payload} -o {output} {input}'
 
     subprocess.run(command, shell=True)
 
@@ -105,7 +105,7 @@ def get_names(input_folder):
     names = [name.replace(' ', '')[:-4] for name in origional_names]
     folder_name = origional_names[0].split("_")[0]
     search_query = origional_names[0].split("_")[0].replace("-", " ")
-    return names, folder_name, search_query
+    return names, folder_name, str(search_query)
 
 
 def get_titles(names, batch_size):
@@ -132,15 +132,15 @@ def make_folder(path, name):
 
 
 def main(args):
+    payload = args.kcc
     archive_paths = [os.path.join(args.input, f) for f in os.listdir(args.input) if os.path.isfile(os.path.join(args.input, f))]
     archive_names, folder_name, search_query = get_names(args.input)
     titles = get_titles(archive_names, args.batch_size)
     kcc_output_folder = make_folder(args.output, folder_name)
     title_index = 0
     if args.imgs: 
-        title_index +=1
         # get array of titles for filemetadata.py
-        filemetadata.main(anime=str(search_query).lower(), file_names=titles) 
+        filemetadata.main(anime=search_query.lower(), file_names=titles) 
         exit()
 
     # make volumes if doesn't already exist
@@ -152,6 +152,7 @@ def main(args):
 
     img = tmp.TempDir()
     cbz = tmp.TempDir()
+    filemetadata.main(anime=search_query.lower(), file_names=titles) 
     for i in range(0, len(archive_paths), args.batch_size):
         batch = archive_paths[i:i+args.batch_size]
         batch_names = archive_names[i:i+args.batch_size] 
@@ -168,7 +169,7 @@ def main(args):
         handle_img_files(img_dir)
         change_to_cbz(title, img_dir, cbz_dir) 
         print("Using KCC to crop and correct the images")
-        use_kcc(title, kcc_output_folder, cbz_dir) 
+        use_kcc(title, kcc_output_folder, cbz_dir, payload) 
         title_index +=1
 
         # filemetadata.main(anime, file_names, cover_count)
