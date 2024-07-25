@@ -8,7 +8,7 @@ import os
 from utils.utils import *
 
 def get_manga_url(anime): 
-  driver, wait = make_driver("https://mangadex.org/")
+  driver, wait = make_driver("https://mangadex.org/", 12)
   search_found = False
   potential_urls = []
 

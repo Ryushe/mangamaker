@@ -31,8 +31,15 @@ Current options:
 4. `--batch_size`
     - How many zip files to put in each mobi
     - default: 5
-6. `--skip` (WIP)
-    - skips to the very end and only uses kcc on files you want
+5. `--use`
+    - options:
+        - meta (default volume collection input: /tmp/.tmp_kcc)
+            - gets amazon metadata (author, asin, etc)
+            - gets volume covers (gets new volume cover after 50 chaps)
+            - note: custom input not yet supported
+        - covers 
+            - dowloads covers for volumes
+            - gets new volume cover every 50 chapters
 
 Notes: 
 - if using own manga zip files make sure their names end with `_cnumber_cnumber`  

@@ -16,7 +16,7 @@ def main(anime):
 
             # wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "puisg-col-inner")))
             # amazon_containers = driver.find_elements(By.CLASS_NAME, "puisg-col-inner")
-            amazon = Search()
+            amazon = Site()
             amazon.set_url("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
             amazon.wait_for(By.ID, "twotabsearchtextbox")
             amazon.button_search("twotabsearchtextbox", "nav-search-submit-button", search_query)

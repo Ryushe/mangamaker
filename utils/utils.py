@@ -1,4 +1,5 @@
 import itertools
+import sys
 import re
 import os
 from selenium import webdriver
@@ -72,9 +73,7 @@ def has_decimal(numbers):
   return False  
 
 def get_folder_files(path):
-
-  return [file for file in os.listdir(path) 
-          if os.path.isfile(os.path.join(path, file))]
+  return [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 
 def cammel_case(words):
@@ -84,7 +83,7 @@ def cammel_case(words):
   return capital_words
   
 
-class Search():
+class Site():
   def __init__(self, driver=None):
     if driver and type(driver) != str: 
       self.driver = driver
@@ -123,15 +122,10 @@ class Search():
   def quit(self):
     self.driver.quit()
 
-
-    
-def make_driver(url, time=10):
-  options = Options()
-  options = webdriver.ChromeOptions() 
-  options.add_argument("--log-level=3")
-  options.add_argument('--headless')
-  driver = webdriver.Chrome(options=options)
-  driver.get(url)
-  wait = WebDriverWait(driver, time)
-
-  return driver, wait
+def search_retry():
+  user_choice = input("Search failed. Retry (y/n) or enter new name: ").lower()
+  if user_choice == 'n':
+    sys.exit("exiting")
+  else:
+    anime = user_choice
+    return anime

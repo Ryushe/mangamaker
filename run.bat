@@ -1,1 +1,2 @@
-python cli.py
+python3 cli.py
+pause
