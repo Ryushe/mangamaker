@@ -2,10 +2,10 @@ import os
 import subprocess 
 from utils.utils import get_folder_files
 
-def get_paths(path, files):
+def get_paths(dir, files):
     paths = []
     for file in files:
-        paths.append(os.path.join(path, file))
+        paths.append(os.path.join(dir, file))
     return paths
 
 
@@ -19,7 +19,7 @@ def good_ol_metadata(book_data, kcc_tmp, covers_tmp, series):
     kcc_paths = get_paths(kcc_tmp, kcc_files)
     cover_paths = get_paths(covers_tmp, cover_files)
 
-    # figure of if work
+    # figure why no work
     for file, cover in zip(kcc_paths, cover_paths):
         command = ("ebook-meta"
                    f" {file}"
