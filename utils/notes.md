@@ -25,6 +25,11 @@ adding:
 - move between kcc_tmp and output
 - method to clear temp dirs -> (allowing for resume)
 
+
+currently:
+- break the main clutter in (run_full_program) into little ones
+    - making calling sub easier
+
 Currenly fixing:
 - null
 

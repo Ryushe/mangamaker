@@ -161,14 +161,7 @@ def start_points(args):
     else: 
         print(f"{option} not an option try again")
 
-
-def main(args):
-
-    # call different things based on args
-    if args.use:
-        start_points(args)
-        exit()
-
+def run_full_program(args):
     payload = args.kcc
     archive_paths = get_folder_files(args.input)
     archive_names, folder_name, search_query = get_names(args.input)
@@ -216,6 +209,64 @@ def main(args):
 
     cover.close() 
     kcc.close()
+    
+
+
+def main(args):
+
+    # call different things based on args
+    if args.use != None:
+        start_points(args)
+        exit()
+    
+    # make volumes if doesn't already exist
+    try:
+        os.makedirs("volumes")
+        print("made folder volumes")
+    except FileExistsError:
+        print("The folder volumes already exists, moving on")
+        
+    payload = args.kcc
+    archive_paths = get_folder_files(args.input) # this is issue LMAO
+    archive_names, folder_name, search_query = get_names(args.input)
+    titles = get_titles(archive_names, args.batch_size)
+    output_folder = make_folder(args.output, folder_name)
+    title_index = 0
+
+
+    img = tmp.TempDir()
+    cbz = tmp.TempDir()
+    kcc = tmp.TempDir()
+    kcc_tmp = kcc.make_tempdir('.tmp_kcc')
+    #covers_tmp -> same as above, use to close dir
+    cover, covers_tmp = get_covers.main(anime=search_query, file_names=titles) 
+    for i in range(0, len(archive_paths), args.batch_size):
+        batch = archive_paths[i:i+args.batch_size]
+        batch_names = archive_names[i:i+args.batch_size] 
+        title = titles[title_index]
+   
+        img_dir = img.make_tempdir('.tmp_img')
+        cbz_dir = cbz.make_tempdir(".tmp_cbz")
+
+        print(title)
+        print(batch, batch_names)
+        extract(batch, img_dir) # for file in input dir -> extracts to img_dir
+        print("Processing files...")
+        # moves img files to .tmp and removes empty folders they came from
+        handle_img_files(img_dir)
+        change_to_cbz(title, img_dir, cbz_dir) 
+        print("Using KCC to crop and correct the images")
+        use_kcc(title, kcc_tmp, cbz_dir, payload) 
+        title_index +=1
+
+        img.close()
+        cbz.close()
+    book_data = amazon_metadata.main(search_query)
+    kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp, cammel_case(words=search_query))
+    move_to_folder(kcc_paths, output_folder)
+
+    # cover.close() 
+    # kcc.close()
     
 
 # todo:

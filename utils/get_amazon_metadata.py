@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from utils.utils import *
+import sys
 
 def get_manga_url(anime):
     search_found = False
@@ -13,7 +14,7 @@ def get_manga_url(anime):
     while not search_found:
         search_query = f"{anime}"
         try:
-            amazon = Search()
+            amazon = Site()
             amazon.set_url("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
             amazon.wait_for(By.ID, "twotabsearchtextbox")
             amazon.button_search("twotabsearchtextbox", "nav-search-submit-button", search_query)
@@ -32,19 +33,16 @@ def get_manga_url(anime):
             search_found = True
 
         except Exception as e:  
-            user_choice = input("Search failed. Retry (y/n) or enter new name: ").lower()
-            if user_choice == 'n':
-                break 
-            else:
-                anime = user_choice
+            anime = search_retry()
+
+
     print("Urls successfully found")
     amazon.quit()
     try:
         return link
     except IndexError:
-        print("Cant find that anime")
-        print("Relaunch using the flag --imgs")
-        exit()
+        print("Index error, exiting...")
+        sys.exit()
 
 def matches(text):
     options = ["asin", "publisher", "publication date"] # could add print length

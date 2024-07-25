@@ -1,1 +1,1 @@
-python cli.py --use covers
+python3 cli.py --use covers
