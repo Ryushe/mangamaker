@@ -13,6 +13,7 @@ def get_manga_url(anime):
 
     while not search_found:
         search_query = f"{anime}"
+        print(f"Searching for {search_query}")
         try:
             amazon = Site()
             amazon.set_url("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
@@ -33,10 +34,12 @@ def get_manga_url(anime):
             search_found = True
 
         except Exception as e:  
-            anime = search_retry()
-
-
-    print("Urls successfully found")
+            anime = search_retry_prompt(anime)
+            if anime == 'skip':
+                return None
+    
+    if search_found:
+        print("Urls successfully found")
     amazon.quit()
     try:
         return link
@@ -84,7 +87,11 @@ def metadata_time(url):
 
 
 def main(anime):
+    print("Getting amazon metadata")
     url = get_manga_url(anime)
-    book_details = metadata_time(url)
-    return (book_details)
+    if url:
+        book_details = metadata_time(url)
+        return (book_details)
+    else:
+        return 
 
