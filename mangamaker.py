@@ -7,6 +7,7 @@ import utils.get_covers as get_covers
 import utils.tmp as tmp
 import utils.get_amazon_metadata as get_amazon_metadata
 import utils.metadata as metadata
+import utils.download_katana_zips as download_katana_zips
 from utils.utils import get_folder_files, cammel_case
 import sys
 
@@ -184,15 +185,20 @@ def move_to_folder(files, output, titles, tmp_folder=''): # not entirely sure wo
 
 
 def start_points(args):
-    # handling start points
+    option = str(args.use[0])
+    if option == 'zips':
+        print("What anime and how many:\nInput format: <anime> <start-end>")
+        anime = input("ex: berserk 50-200\n")
+        download_katana_zips.main(anime)
+        exit()
+
+    # below items are for 
     archive_names, folder_name, search_query = get_names(args.input)
     titles = get_titles(archive_names, args.batch_size)
-    option = str(args.use[0])
     if option == 'covers': 
         # get array of titles for filemetadata.py
         get_covers.main(anime=search_query, file_names=titles) 
-        exit()
-    if option == 'meta': #forces get of new covers
+    elif option == 'meta': #forces get of new covers
         allowing_get_path = tmp.TempDir()
         # if--> allowing for custom input for applying metadata
         if args.input != 'archives':
@@ -215,7 +221,6 @@ def start_points(args):
         elif cover_files:
             metadata.apply(input_directory, covers_tmp, cammel_case(words=search_query))
         move_to_folder(files, output_folder, titles, cover) 
-        exit()
     else: 
         print(f"{option} not an option try again")
 
@@ -277,7 +282,7 @@ def run_full_program(args):
 def main(args):
 
     # call different things based on args
-    if args.use != None:
+    if args.use[0] != None:
         start_points(args)
         exit()
     else:

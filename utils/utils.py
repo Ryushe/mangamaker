@@ -139,3 +139,5 @@ def search_retry_prompt(origional_anime):
   else:
     anime = user_choice
     return anime
+
+

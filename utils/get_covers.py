@@ -17,7 +17,6 @@ def get_manga_url(anime):
           wait.until(EC.presence_of_element_located((By.ID, "header-search-input")))
           title = driver.title
           print(title)
-
           search = driver.find_element(By.ID, "header-search-input")
           search.send_keys(anime)
 
