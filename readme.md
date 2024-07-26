@@ -23,7 +23,7 @@ Current options:
     - output location of the .mobi file
     - default: volumes
 2. `-i, --input`
-    - path to your cbz archives
+    - path to your cbz archives/.mobi files for editing meta data
     - default: archives
 3. `--keep`
     - doesn't remove the img/cbz folders when finished
