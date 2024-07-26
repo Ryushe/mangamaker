@@ -5,9 +5,10 @@ import shutil
 import time
 import utils.get_covers as get_covers
 import utils.tmp as tmp
-import utils.get_amazon_metadata as amazon_metadata
-import utils.apply_metadata as apply_metadata
+import utils.get_amazon_metadata as get_amazon_metadata
+import utils.metadata as metadata
 from utils.utils import get_folder_files, cammel_case
+import sys
 
 def extract_files_to(files, directory): 
     # for file in archive(defualt) folder extract to .tmp
@@ -104,13 +105,16 @@ def use_kcc(title, output, cbz_dir, payload):
     subprocess.run(command, shell=True)
 
 def get_names(input_folder):
-    zip_path = os.path.join(input_folder)
-    origional_names = sorted(os.listdir(zip_path))
-    names = [name.replace(' ', '')[:-4] for name in origional_names]
-    folder_name = origional_names[0].split("_")[0]
-    search_query = folder_name.replace('-', ' ')
-
-    return names, folder_name, str(search_query).lower()
+    try:
+        zip_path = os.path.join(input_folder)
+        origional_names = sorted(os.listdir(zip_path))
+        names = [os.path.splitext(name.replace(' ', ''))[0] for name in origional_names]
+        folder_name = origional_names[0].split("_")[0]
+        search_query = folder_name.replace('-', ' ')
+        return names, folder_name, str(search_query).lower()
+    except IndexError:
+        print(f"{input_folder} is empty try again")
+        sys.exit()
 
 
 def get_titles(names, batch_size):
@@ -120,6 +124,7 @@ def get_titles(names, batch_size):
 
     titles = []
     for list in lists:
+        print(list)
         name = list[0].split("_")[0]
         first = list[0].split("_")[1]
         last = list[-1].split("_")[2]
@@ -142,17 +147,17 @@ def remove_file(path):
         print(f"Error removing {path}")
 
 
-def move_to_folder(files, output, titles, kcc): # not entirely sure works
+def move_to_folder(files, output, titles, tmp_folder=''): # not entirely sure works
     error = False
     remove_all = False
     if len(files) == len(titles):
         for file, title in zip(files, titles):
             try:
-                final_path = os.path.join(output, title, '.mobi')
+                final_path = os.path.join(output, title +'.mobi')
                 if os.path.exists(final_path):
                     print(f"Found {final_path}")
                     if not remove_all:
-                        user_choice = input("Would you like write over it? (y)es, (n)o, (a)ll").lower()
+                        user_choice = input("Would you like write over it? (y)es, (n)o, (a)ll: ").lower()
                         if user_choice == 'y':
                             remove_file(final_path)
                         elif user_choice == 'a':
@@ -169,32 +174,47 @@ def move_to_folder(files, output, titles, kcc): # not entirely sure works
             except OSError as e:
                 print(f"Error deleting file: {e}")
                 error = True
-        kcc.close()
     else:
         print(f"length of files and item names arent the same somehow")
         print(f"you can find your files in .tmp/.tmp_covers ;-;")
     if not error:
-        print(f"Successfully moved all files into dir {output}")
+        print(f"Successfully moved files into dir {output}")
+    if tmp_folder:
+        tmp_folder.close()
 
 
 def start_points(args):
     # handling start points
     archive_names, folder_name, search_query = get_names(args.input)
     titles = get_titles(archive_names, args.batch_size)
-    option = str(args.use).replace("'","").replace("]", "").replace("[", "").lower()
+    option = str(args.use[0])
     if option == 'covers': 
         # get array of titles for filemetadata.py
         get_covers.main(anime=search_query, file_names=titles) 
         exit()
-    if option == 'meta':
-        tmps = tmp.TempDir()
-        kcc_tmp = tmps.get_path('.tmp_kcc')
-        covers_tmp = tmps.get_path('.tmp_cover')
+    if option == 'meta': #forces get of new covers
+        allowing_get_path = tmp.TempDir()
+        # if--> allowing for custom input for applying metadata
+        if args.input != 'archives':
+            if os.path.isdir(args.input):
+                input_directory = args.input
+            else:
+                print(f"{args.input} is not a valid directory")
+                sys.exit()
+        else:
+            input_directory = allowing_get_path.get_path('.tmp_kcc')
+            allowing_get_path.close()
+        files = get_folder_files(input_directory)
         output_folder = make_folder(args.output, folder_name)
+        cover, covers_tmp = get_covers.main(anime=search_query, file_names=titles) 
+        cover_files = sorted(get_folder_files(covers_tmp))
 
-        book_data = amazon_metadata.main(search_query)
-        kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp, cammel_case(words=search_query))
-        move_to_folder(kcc_paths, output_folder, titles, tmps) 
+        book_data = get_amazon_metadata.main(search_query)
+        if book_data: # assuming we have covers (since amazon the one thats messing up rn)
+            metadata.apply(input_directory, covers_tmp, cammel_case(words=search_query), book_data)
+        elif cover_files:
+            metadata.apply(input_directory, covers_tmp, cammel_case(words=search_query))
+        move_to_folder(files, output_folder, titles, cover) 
         exit()
     else: 
         print(f"{option} not an option try again")
@@ -244,8 +264,10 @@ def run_full_program(args):
         img.close()
         cbz.close()
     #thread 
-    book_data = amazon_metadata.main(search_query)
-    kcc_paths = apply_metadata.good_ol_metadata(book_data, kcc_tmp, covers_tmp, cammel_case(words=search_query))
+    book_data = get_amazon_metadata.main(search_query)
+    metadata.apply(kcc_tmp, covers_tmp, cammel_case(words=search_query), book_data)
+
+    kcc_paths = get_folder_files(kcc_tmp)
     move_to_folder(kcc_paths, output_folder, titles, kcc)
 
     # cover.close() 

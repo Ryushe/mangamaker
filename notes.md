@@ -3,20 +3,38 @@ keeping a list of what I want to do:
 `pipreqs .` -> gens req.txt
 
 # RN
-- making run all into small fns
+- fixing meta
+    - going to need to change run all as well
+  
+# if go back
+- final_path = os.path.join(output, title, '.mobi') 
+    - change , to a +
+- def get_folder_files(path):
+    folder_files = []
+    for file in os.listdir(path):
+        file_path = os.path.join(path, file)
+        if os.path.isfile(file_path):
+            folder_files.append(file_path)
+    return folder_files
+- remove get_paths in metadata
 
 # Todo
 - amazon meta.py:
     - have data based on volumes
     - get book data if fails
+    - add skip functionality
 
 - get_covers:
+    - if fails make option to repeat
     - make compare name in potential urls list, one closest gets added
 
 - general:
+    - clean up start points meta (a mess)
+    - when spilt name with .vol if it doesnt find .vol use something else, eg: a number (regex)
     -  parser.add_argument('--use', help='use: set(meta), dowload(covers)', type=str, nargs=1)
         - make this havem more args (optional)
         - input/output args
+    - make metadata get all metadata instead of get_amazon_metadat
     - break the main clutter in (run_full_program) into little ones
         - making calling sub easier
     - resume anywhere 
@@ -25,6 +43,9 @@ keeping a list of what I want to do:
     - have volumes chapts closer to how they work (allowing for more accurate progress)
     - could have close() close all tmp
         - since tmp can make multiple tmps under the same instance
+
+- mangamaker:
+    - make meta option use new covers/or old covers
 
 # done
 - include all info about the file in metadata

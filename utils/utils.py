@@ -73,7 +73,13 @@ def has_decimal(numbers):
   return False  
 
 def get_folder_files(path):
-  return [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    folder_files = []
+    for file in os.listdir(path):
+        file_path = os.path.join(path, file)
+        if os.path.isfile(file_path):
+            folder_files.append(file_path)
+    return folder_files
+     
 
 
 def cammel_case(words):
@@ -122,10 +128,14 @@ class Site():
   def quit(self):
     self.driver.quit()
 
-def search_retry():
-  user_choice = input("Search failed. Retry (y/n) or enter new name: ").lower()
+def search_retry_prompt(origional_anime):
+  user_choice = input("Search failed. Retry (y/n/s(kip)) or enter new name: ").lower()
   if user_choice == 'n':
     sys.exit("exiting")
+  elif user_choice == 's':
+    return 'skip'
+  elif user_choice == 'y':
+    return origional_anime
   else:
     anime = user_choice
     return anime

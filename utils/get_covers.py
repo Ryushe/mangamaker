@@ -33,13 +33,11 @@ def get_manga_url(anime):
           search_found = True
 
       except Exception as e:  
-          user_choice = input("Search failed. Retry (y/n) or enter new name: ").lower()
-          if user_choice == 'n':
-              break 
-          else:
-              anime = user_choice
-              search.clear()
-  print("Urls successfully found")
+            anime = search_retry_prompt(anime)
+            if anime == 'skip':
+                return None
+  if search_found:
+    print("Urls successfully found")
   driver.quit()
   try:
     return potential_urls[0]
@@ -128,6 +126,7 @@ def download_covers(cover_urls, file_names, cover_dir):
 
 
 def main(anime: str, file_names):
+  print("Getting covers")
   cover = tmp.TempDir()
   cover_dir = cover.make_tempdir(".tmp_covers")
 
