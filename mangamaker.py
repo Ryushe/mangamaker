@@ -188,8 +188,9 @@ def start_points(args):
     option = str(args.use[0])
     if option == 'zips':
         print("What anime and how many:\nInput format: <anime> <start-end>")
-        anime = input("ex: berserk 50-200\n")
-        download_katana_zips.main(anime)
+        # anime = input("ex: berserk 50-200\n")
+        anime = "berserk"
+        download_katana_zips.main(anime, args.output)
         exit()
 
     # below items are for 

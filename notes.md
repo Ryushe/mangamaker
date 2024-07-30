@@ -8,9 +8,12 @@ keeping a list of what I want to do:
     - need to fix search_container_for_url
         - make work with covers and amazon meta
 
-
+# remember
+- search loop doesnt exit properly anymore
 
 # Todo
+- migrate the get_covers and amazon -> the site class (see download_katana_zips.py)
+
 - amazon meta.py:
     - have data based on volumes
     - get book data if fails
