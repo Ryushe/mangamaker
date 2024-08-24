@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import sys
-from utils.utils import non_specialify, is_similar
+from utils.utils import *
 
 
 def search_retry_prompt(origional_anime):
@@ -21,7 +21,26 @@ def search_retry_prompt(origional_anime):
     return anime
 
 
+# defferent than make_driver() because this has to do with the class handling, once change get meta/cover can only use this
+def make_new_driver( url=None, type_=None, time=12):
+  if type_ and type(type_) != str: 
+    driver = type_
+  elif type_ == "test":
+    driver = webdriver.Chrome()
+  else:
+    options = Options()
+    options = webdriver.ChromeOptions() 
+    options.add_argument("--log-level=3")
+    options.add_argument('--headless')
+    driver = webdriver.Chrome(options=options)
+  wait = WebDriverWait(driver, time) 
+  if url:
+    driver.get(url)
+    print(driver.title)
+
+
 class Site():
+  # could replace for make_new_driver
   def __init__(self, url, type_=None, time=12):
     if type_ and type(type_) != str: 
       self.driver = type_
@@ -36,7 +55,7 @@ class Site():
     self.wait = WebDriverWait(self.driver, time) 
     self.driver.get(url)
     print(self.driver.title)
-          
+  
   def set_url(self, url):
       self.driver.get(url)
       print(self.driver.title)
@@ -127,10 +146,42 @@ class Site():
     if self.url_found:
         print("Urls successfully found")
         return self.url
+  
 
-  def download_archives(self, output, url=None):
+  def get_chapter_urls(self, chapters_container, input_chapters):
+    max_chapt_nums = []
+    chapt_urls = []
+    # gets max chapt nums from b tags
+    for chapter in chapters_container:
+      chapter_tags = chapter.find_elements(By.TAG_NAME, "b")
+      chapter_nums = [chapter.text for chapter in chapter_tags]
+      urls = chapter.find_elements
+      for i, num in enumerate(chapter_nums):
+        if i % 2 == 1: # bad logic
+          max_chapt_nums.extend(extract_numbers(num))
+          chapt_urls.append(chapter.find_element(By.TAG_NAME, "a").get_attribute("href"))
+
+    # checking if in range, if so will add the url to the list
+    for num, url in zip(max_chapt_nums, chapt_urls):
+      if num in range(input_chapters[0], input_chapters[1]+1):
+        print(f"{num} found in range {input_chapters[0]}-{input_chapters[1]}")       
+        print(f"chapt {num}: {url}")
+  
+  def bot_handler(self):
+    return
+  # continue (need capache bypass/wait for user to complete capache)
+
+  def download_archives(self, input_chapters, output, url=None):
+    urls = []
     if url is None:
-      url = self.url
+      url = self.url+"/download"
+    self.driver.get(url)
+    print("download url: "+url)
+    self.wait_for_all(By.CLASS_NAME, "chapter")
+    chapters_container = self.get_containers("chapter")
+    input_chapters = [2, 40]
+    max_chapter_nums = self.get_chapter_urls(chapters_container, input_chapters)
+
 
   def quit(self):
     self.driver.quit()

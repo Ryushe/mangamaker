@@ -68,18 +68,6 @@ def get_img_urls(url):
   return new_cover_urls
 
 
-def extract_numbers(string): # takes 1 arg no list
-  decimal = False
-  numbers = re.findall(r'-?\d+\.?\d*', string)
-  for num in numbers:
-    if is_decimal(num):
-      decimal = True
-  if decimal:
-    return [float(num) for num in numbers]
-  else:
-    return [int(num) for num in numbers]
-  
-
 def get_indexes(file_names):
   extracted_int = extract_numbers(file_names[0])
   chapters_per = max(extracted_int) - (min(extracted_int) - 1)

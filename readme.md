@@ -1,9 +1,10 @@
+# Manga Maker
+![manga](./manga.jpeg)
+External dependencies not in req.txt: Calibre
 Used in proj:  
 patoolib, shutil, KCC, patool, PySide6, Pillow, psutil, requests, python-slugify, raven, mozjpeg-lossless-optimization, natsort, distro, selenium
 
-External dependencies not in req.txt: Calibre
-
-# Instructions
+## Instructions
 1. `git clone https://github.com/Ryushe/mangamaker.git`
 2. `pip install -r requirements.txt`, this will install all requirements needed 
 3. install calibre [here](https://calibre-ebook.com/download)
@@ -17,7 +18,7 @@ Note: If you have a diferent version you may want to customize the kcc payload
 - options found [here](https://github.com/ciromattia/kcc?tab=readme-ov-file#standalone-kcc-c2epy-usage)
 - current payload `-u --croppingpower 0.80 --manga-style`
 
-# Usage
+## Usage
 Current options:
 1. `-o, --output`
     - output location of the .mobi file
@@ -46,7 +47,7 @@ Notes:
 - ex: `chainsawman_c101_c150`, `one-piece_c150_c160`
 
 
-# How I use this tool
+## How I use this tool
 Currently I have a paper edition kindle 
 - install zip files from [MangaKatana](https://mangakatana.com/). This site lets you download manga in zip files
 - drag zip files into the input dir (default: archives)
@@ -55,12 +56,12 @@ Currently I have a paper edition kindle
     - note: covers found in `.tmp/.tmpcovers`
 
 	
-# Todo
+## Todo
 1. auto get downloaded zip files
 2. find and download ico files for the anime
 
 
-# Shoutouts
+## Shoutouts
 Big thanks to:
 - Developer of KCC 
     - Found [here](https://github.com/ciromattia/kcc)

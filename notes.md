@@ -2,6 +2,11 @@ keeping a list of what I want to do:
 
 `pipreqs .` -> gens req.txt
 
+make linux and windows:
+- check os and then use env variables
+- run script that installs calibre x 7z (checks if installed) x adds to env variables so can pull into program
+- docker container
+
 # RN
 - why no get url but thow error when return self.url
 - search class bbg
@@ -10,9 +15,11 @@ keeping a list of what I want to do:
 
 # remember
 - search loop doesnt exit properly anymore
+- moved extract_numbrs to utils
 
 # Todo
 - migrate the get_covers and amazon -> the site class (see download_katana_zips.py)
+- if cover not found use the one from mangakatana
 
 - amazon meta.py:
     - have data based on volumes
@@ -44,6 +51,10 @@ keeping a list of what I want to do:
 - mangamaker:
     - make meta option use new covers/or old covers
     - make zips option cleaner (right now shitty input system)
+
+- web_search:
+    - for i, num in enumerate (getting 2nd index) kinda poor, would be good to find max
+
 
 # done
 - include all info about the file in metadata
