@@ -139,3 +139,15 @@ def search_retry_prompt(origional_anime):
   else:
     anime = user_choice
     return anime
+
+
+def extract_numbers(string): # takes 1 arg no list
+  decimal = False
+  numbers = re.findall(r'-?\d+\.?\d*', string)
+  for num in numbers:
+    if is_decimal(num):
+      decimal = True
+  if decimal:
+    return [float(num) for num in numbers]
+  else:
+    return [int(num) for num in numbers]

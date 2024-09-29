@@ -3,49 +3,48 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import requests
 import utils.tmp as tmp
-import re
 import os
 from utils.utils import *
 
+
+
 def get_manga_url(anime): 
-  driver, wait = make_driver("https://mangadex.org/", 12)
   search_found = False
   potential_urls = []
 
   while not search_found:
-      try:
-          wait.until(EC.presence_of_element_located((By.ID, "header-search-input")))
-          title = driver.title
-          print(title)
+    search_query = f"{anime}"
+    print(f"Searching for {search_query}")
+    try:
+      container_name = "manga-card"
+      mangakatana = Site("test")
+      mangakatana.set_url(f"https://mangadex.org/search?q={anime}")
+      mangakatana.wait_for_all(By.CLASS_NAME, container_name)
+      manga_containers = mangakatana.get_containers(container_name)
 
-          search = driver.find_element(By.ID, "header-search-input")
-          search.send_keys(anime)
-
-          wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "dense-manga-container")))
-
-          manga_containers = driver.find_elements(By.CLASS_NAME, "dense-manga-container")
-          for manga in manga_containers:
-              web_manga_name = manga.find_element(By.TAG_NAME, "div").text.lower()
-              no_special_char = non_specialify(web_manga_name)
-              if(is_similar(anime, no_special_char)):
-                print(anime, no_special_char)
-                potential_urls.append(manga.find_element(By.TAG_NAME, "a").get_attribute("href"))
-          search_found = True
-
-      except Exception as e:  
-            anime = search_retry_prompt(anime)
-            if anime == 'skip':
-                return None
-  if search_found:
-    print("Urls successfully found")
-  driver.quit()
-  try:
-    return potential_urls[0]
-  except IndexError:
-    print("Cant find that anime")
-    print("Relaunch using the flag --imgs")
-    exit()
-
+      for manga in manga_containers:
+        web_manga_name = manga.find_element(By.TAG_NAME, "span").text.lower()
+        print(f"web manga name = {web_manga_name}")
+        no_special_char = non_specialify(web_manga_name)
+        if(is_similar(anime, no_special_char)):
+          print(anime, no_special_char)
+          potential_urls.append(manga.find_element(By.TAG_NAME, "a").get_attribute("href"))
+        break
+      search_found = True
+  
+    except Exception as e:  
+        anime = search_retry_prompt(anime)
+        if anime == 'skip':
+            return None
+    if search_found:
+      print("Urls successfully found")
+      mangakatana.quit()
+    try:
+      return potential_urls[0]
+    except IndexError:
+      print("Cant find {anime}")
+      print("Relaunch using the flag --imgs")
+      exit() 
 
 
 def get_img_urls(url):
@@ -68,18 +67,6 @@ def get_img_urls(url):
   driver.quit()
   return new_cover_urls
 
-
-def extract_numbers(string): # takes 1 arg no list
-  decimal = False
-  numbers = re.findall(r'-?\d+\.?\d*', string)
-  for num in numbers:
-    if is_decimal(num):
-      decimal = True
-  if decimal:
-    return [float(num) for num in numbers]
-  else:
-    return [int(num) for num in numbers]
-  
 
 def get_indexes(file_names):
   extracted_int = extract_numbers(file_names[0])

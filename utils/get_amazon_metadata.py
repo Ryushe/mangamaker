@@ -15,12 +15,15 @@ def get_manga_url(anime):
         search_query = f"{anime}"
         print(f"Searching for {search_query}")
         try:
+            search_box = "twotabsearchtextbox"
+            search_button = "nav-search-submit-button"
+            container_name = "puisg-col-inner"
             amazon = Site()
             amazon.set_url("https://www.amazon.com/kindle-dbs/storefront?storeType=browse&node=154606011")
-            amazon.wait_for(By.ID, "twotabsearchtextbox")
-            amazon.button_search("twotabsearchtextbox", "nav-search-submit-button", search_query)
-            amazon.wait_for_all(By.CLASS_NAME, "puisg-col-inner")
-            amazon_containers = amazon.get_containers("puisg-col-inner")
+            amazon.wait_for(By.ID, search_box)
+            amazon.button_search(search_box, search_button, search_query)
+            amazon.wait_for_all(By.CLASS_NAME, container_name)
+            amazon_containers = amazon.get_containers(container_name)
 
 
             for container in amazon_containers:
