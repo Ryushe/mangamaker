@@ -2,6 +2,7 @@
 from utils.web_search import Site
 from selenium.webdriver.common.by import By
 
+# NOT COMPLETED 
 
 def main(search_query, chapts, output_dir):
     manga_katana = Site("https://mangakatana.com/", "test")

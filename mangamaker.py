@@ -97,11 +97,18 @@ def make_cbz_archive(title, img_dir, cbz_dir):
 
 def use_kcc(title, output, cbz_dir, payload):
     # output = os.path.join(os.getcwd(),output)
+    kcc_path = os.path.join("manga_format_maker", "kcc-c2e.py")
     output = os.path.abspath(output)
-    print('output = '+output)
     input = os.path.join(cbz_dir,title+'.cbz')
+
+    print('output = '+output)
     print('input = '+input)
-    command = f'python manga_format_maker\\kcc-c2e.py {payload} -o {output} {input}'
+    try:
+        command = f'python {kcc_path} {payload} -o {output} {input}'
+    except ModuleNotFoundError as e: 
+        print(f"Module not found go install it:\n{e}")
+        print("exiting...")
+        sys.exit()
 
     subprocess.run(command, shell=True)
 
@@ -151,35 +158,34 @@ def remove_file(path):
 def move_to_folder(files, output, titles, tmp_folder=''): # not entirely sure works
     error = False
     remove_all = False
-    if len(files) == len(titles):
-        for file, title in zip(files, titles):
-            try:
-                final_path = os.path.join(output, title +'.mobi')
-                if os.path.exists(final_path):
-                    print(f"Found {final_path}")
-                    if not remove_all:
-                        user_choice = input("Would you like write over it? (y)es, (n)o, (a)ll: ").lower()
-                        if user_choice == 'y':
-                            remove_file(final_path)
-                        elif user_choice == 'a':
-                            remove_file(final_path)
-                            remove_all = True
-                        else:
-                            continue
-                    elif remove_all: 
-                        remove_file(final_path)
-                shutil.move(file, final_path)
-            except shutil.Error as e:
-                print(f"Error when moving file: {e}")
-                error = True
-            except OSError as e:
-                print(f"Error deleting file: {e}")
-                error = True
-    else:
-        print(f"length of files and item names arent the same somehow")
-        print(f"you can find your files in .tmp/.tmp_covers ;-;")
+    for file in files:
+        try:
+            title = os.path.basename(file)
+            output_file = os.path.join(output, title) # gets .mobi
+            if os.path.exists(output_file):
+                print(f"Found {output_file}")
+                if not remove_all:
+                    user_choice = input("Would you like write over it? (y)es, (n)o, (a)ll: ").lower()
+                    if user_choice == 'y':
+                        remove_file(output_file)
+                    elif user_choice == 'a':
+                        remove_file(output_file)
+                        remove_all = True
+                    else:
+                        continue
+                elif remove_all: 
+                    remove_file(output_file)
+            shutil.move(file, output_file)
+        except shutil.Error as e:
+            print(f"Error when moving file: {e}")
+            error = True
+        except OSError as e:
+            print(f"Error deleting file: {e}")
+            error = True
     if not error:
         print(f"Successfully moved files into dir {output}")
+
+
     if tmp_folder:
         tmp_folder.close()
 
@@ -276,7 +282,7 @@ def run_full_program(args):
     book_data = get_amazon_metadata.main(search_query)
     metadata.apply(kcc_tmp, covers_tmp, cammel_case(words=search_query), book_data)
 
-    kcc_paths = get_folder_files(kcc_tmp)
+    kcc_paths = get_folder_files(str(kcc_tmp))
     move_to_folder(kcc_paths, output_folder, titles, kcc)
 
     # cover.close() 
@@ -286,7 +292,7 @@ def run_full_program(args):
 def main(args):
 
     # call different things based on args
-    if args.use[0] != None:
+    if args.use != None:
         start_points(args)
         exit()
     else:

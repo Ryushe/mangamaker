@@ -9,14 +9,20 @@ def get_paths(dir, files):
         paths.append(os.path.join(dir, file))
     return paths
 
+def duplicate_covers(covers):
+    try:
+        covers.append(covers[-1])
+    except FileNotFoundError as e:
+        print(f"{e}")
+    return covers
 
 def apply(input_directory, covers_tmp, series, book_data =''):
-    print(f"editing metadata of {series}")
-
     input_files = sorted(get_folder_files(input_directory))
     cover_files = sorted(get_folder_files(covers_tmp))
+    while len(input_files) > len(cover_files):
+        cover_files = duplicate_covers(cover_files)
 
-    # figure why no work
+    print(f"editing metadata of {series}")
     for file, cover in zip(input_files, cover_files):
         if book_data:
             asin, publisher, publication_date, author, author_sort = book_data.values()

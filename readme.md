@@ -4,19 +4,53 @@ External dependencies not in req.txt: Calibre
 Used in proj:  
 patoolib, shutil, KCC, patool, PySide6, Pillow, psutil, requests, python-slugify, raven, mozjpeg-lossless-optimization, natsort, distro, selenium
 
-## Instructions
+## Windows
 1. `git clone https://github.com/Ryushe/mangamaker.git`
 2. `pip install -r requirements.txt`, this will install all requirements needed 
-3. install calibre [here](https://calibre-ebook.com/download)
-4. move manga .zip files into input folder (default: archives)
+    - instructions for virtual environment found below
+3. install calibre found [here](https://calibre-ebook.com/download)
+4. install kindle-previewer found [here](https://www.amazon.com/Kindle-Previewer/b?ie=UTF8&node=21381691011)
+  
+5. put manga .zip files into input folder (default: archives)
     - can find manga files [here](https://mangakatana.com/)
     - note: if archives folder isn't there, just make one in the project root directory
-5. `python mangamaker.py [options]` or `run.bat`
+6. `python cli.py [options]` or `run.bat`
 
-Note: If you have a diferent version you may want to customize the kcc payload  
+Note: If you have a diferent kindle you may want to customize the kcc payload  
 - `--kcc <kcc options>`
 - options found [here](https://github.com/ciromattia/kcc?tab=readme-ov-file#standalone-kcc-c2epy-usage)
 - current payload `-u --croppingpower 0.80 --manga-style`
+
+## Linux Install
+1. `git clone https://github.com/Ryushe/mangamaker.git`
+2. `pip install -r requirements.txt`, this will install all requirements needed 
+3. install calibre [here](https://calibre-ebook.com/download)
+    - or install command: `sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin`
+4. install 7z: 
+    - ubuntu `sudo apt install p7zip-full`
+    - arch `sudo pacman -S p7zip`
+5. install kinglegen:
+    - `curl https://archive.org/download/kindlegen_linux_2_6_i386_v2_9/kindlegen_linux_2.6_i386_v2_9.tar.gz -o kindlegen.tar.gz`
+    - `tar -xzvf kindlegen.tar.gz -C kindlegen`
+    - `sudo mv kindlegen/kindlegen /usr/local/bin`
+      - makes file executable anywhere
+    - `rm -rf kindlegen`
+6. put manga .zip files into input folder (default: archives)
+    - can find manga files [here](https://mangakatana.com/)
+    - note: if archives folder isn't there, just make one in the project root directory
+7. `python cli.py [options]` or `run.bat`
+
+## Venv
+A virtual environment allows you to not have to worry about managing versions of libraries. It sets this python environment for this project specifically.
+
+Creating one:
+1. `pip install virtualenv`
+2. `virtualenv venv`
+3. `source venv/bin/activate`
+4. `which python` - should list your current directory
+
+## Docker
+1. `docker build -t mangamaker .`
 
 ## Usage
 Current options:
@@ -66,3 +100,5 @@ Big thanks to:
 - Developer of KCC 
     - Found [here](https://github.com/ciromattia/kcc)
 - Kovid Goyal (Calibre ebook-meta)
+
+python version 3.12.6
