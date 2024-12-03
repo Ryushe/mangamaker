@@ -59,7 +59,11 @@ def matches(text):
 
 def metadata_time(url):
     driver, wait = make_driver(url)
-    wait.until(EC.presence_of_element_located((By.ID, "detailBullets_feature_div")))
+    try:
+        wait.until(EC.presence_of_element_located((By.ID, "detailBullets_feature_div")))
+    except:
+        print("Waited too long, skipping metadata")
+        return
     author_text = driver.find_element(By.XPATH, "//span[@class='author notFaded']").text
     author = author_text.split(' ')[:-1]
     author_sort = f"{author[1]}, {author[0]}"

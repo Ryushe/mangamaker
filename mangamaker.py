@@ -155,7 +155,7 @@ def remove_file(path):
         print(f"Error removing {path}")
 
 
-def move_to_folder(files, output, titles, tmp_folder=''): # not entirely sure works
+def move_to_folder(files, output, tmp_folder=''): # not entirely sure works
     error = False
     remove_all = False
     for file in files:
@@ -197,8 +197,8 @@ def start_points(args):
         # usr_input = input("ex: berserk 50-200\n")
         # anime, *chapts = str(usr_input.replace("-",' ')).split(" ")
         # chapts = [int(chapt) for chapt in chapts]
-        anime = "berserk"
-        chapts = "1-100"
+        anime = "tokyo ghoul"
+        chapts = "1-10"
         download_katana_zips.main(anime, chapts, args.output)
         exit()
 
@@ -230,12 +230,19 @@ def start_points(args):
             metadata.apply(input_directory, covers_tmp, cammel_case(words=search_query), book_data)
         elif cover_files:
             metadata.apply(input_directory, covers_tmp, cammel_case(words=search_query))
-        move_to_folder(files, output_folder, titles, cover) 
+        move_to_folder(files, output_folder, cover) 
     else: 
         print(f"{option} not an option try again")
 
 
 def run_full_program(args):
+    print("""
+#################################
+#                               #
+#      M A N G A M A K E R      #
+#                               #
+#################################
+""")
     # make volumes if doesn't already exist
     try:
         os.makedirs("volumes")
@@ -283,7 +290,7 @@ def run_full_program(args):
     metadata.apply(kcc_tmp, covers_tmp, cammel_case(words=search_query), book_data)
 
     kcc_paths = get_folder_files(str(kcc_tmp))
-    move_to_folder(kcc_paths, output_folder, titles, kcc)
+    move_to_folder(kcc_paths, output_folder, kcc)
 
     # cover.close() 
     # kcc.close()

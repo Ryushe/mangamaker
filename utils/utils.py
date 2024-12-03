@@ -124,9 +124,43 @@ class Site():
   def get_containers(self, id, method=By.CLASS_NAME):
     containers = self.driver.find_elements(method, id)
     return containers
+  
+  def current_url(self):
+    return self.driver.current_url
 
   def quit(self):
     self.driver.quit()
+
+  def search_container_for_url(self, container, _filter=""):
+    for item in container:
+      # item_name = item.find_element(By.XPATH, '//h3[class="title"]').find_element(By.TAG_NAME, "a").text.lower()
+      title_class = item.find_element(By.CLASS_NAME, "title")
+      item_name = title_class.find_element(By.TAG_NAME, "a").text
+      item_url = item.find_element(By.TAG_NAME, "a").get_attribute("href")
+      if _filter:
+        if is_similar(item_name, _filter):
+          return item_url
+      else:
+        return item_url
+  
+  def search_container_for_urls(self, container, _filter=""):
+    names = []
+    urls = []
+    for item in container:
+      # item_name = item.find_element(By.XPATH, '//h3[class="title"]').find_element(By.TAG_NAME, "a").text.lower()
+      title_class = item.find_element(By.CLASS_NAME, "title")
+      item_name = title_class.find_element(By.TAG_NAME, "a").text
+      item_url = item.find_element(By.TAG_NAME, "a").get_attribute("href")
+      if _filter:
+        if is_similar(item_name, _filter):
+          names.append(item_name)
+          urls.append(item_url)
+      else:
+          names.append(item_name)
+          urls.append(item_url)
+    return names, urls
+  
+
 
 def search_retry_prompt(origional_anime):
   user_choice = input("Search failed. Retry (y/n/s(kip)) or enter new name: ").lower()
@@ -139,7 +173,6 @@ def search_retry_prompt(origional_anime):
   else:
     anime = user_choice
     return anime
-
 
 def extract_numbers(string): # takes 1 arg no list
   decimal = False

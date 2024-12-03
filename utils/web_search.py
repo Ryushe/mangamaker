@@ -79,29 +79,7 @@ class Site():
     self.wait_for_all(method, self.container_element)
     containers = self.driver.find_elements(method, class_name)
     return containers
-  
-  def set_search_elements(self, 
-                   search_bar_id, 
-                   search_button_id,
-                   container_element, container_method,
-                   manga_name_tag, manga_method=By.TAG_NAME):
-    self.search_bar_id = search_bar_id
-    self.search_button_id = search_button_id
-    self.container_element = container_element
-    self.container_method = container_method
-    self.manga_name_tag = manga_name_tag
-    self.manga_method = manga_method
-  
-  
-  def search_site(self, search_bar_element='', search_button_element='', search_query=''):
-    # if given proper args, search site for the query
-    if search_bar_element and search_button_element and search_query:
-        self.wait_for(By.ID, search_bar_element)
-        self.button_search(search_bar_element, search_button_element, search_query)
-    else:
-        self.wait_for(By.ID, self.search_bar_id)
-        self.button_search(self.search_bar_id, self.search_button_id, self.search_query)
-    
+
   def search_amazon_containers_url(self):
       # since going to need to be special
     return
@@ -114,7 +92,7 @@ class Site():
       self.filtered_name = non_specialify(self.container_name)
 
     # continue 
-  def search_containers_for_url(self):
+  def search_container_for_url(self):
     print(self.manga_containers)
     for container in self.manga_containers:
         self.container_name = container.find_element(self.manga_method, self.manga_name_tag).text.lower() 
@@ -126,27 +104,6 @@ class Site():
             break
         self.url_found = True
 
-  def search_for_manga_url(self, search_query, filter_="default"):
-    self.url_found = False
-    self.filter_ = filter_
-    potential_urls = []
-    while not self.url_found:
-        self.search_query = f"{search_query}"
-        print(f"Searching for {search_query}")
-        try:
-            self.search_site()
-            self.manga_containers = self.get_containers(self.container_element, self.container_method)
-            self.search_containers_for_url()
-
-        except Exception as e:  
-          print(f"error {e}")
-          self.search_query = search_retry_prompt(origional_anime=self.search_query)
-          if self.search_query == 'skip':
-              return None # dont think this exits anymore
-    if self.url_found:
-        print("Urls successfully found")
-        return self.url
-  
 
   def get_chapter_urls(self, chapters_container, input_chapters):
     max_chapt_nums = []

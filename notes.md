@@ -26,6 +26,13 @@ make linux and windows:
 - moved extract_numbrs to utils
 
 # Todo
+- upon initial run make create archives folder and then exit
+- make output cuter and have a file dedicated to ascii art
+- make --use azips (this will auto download, if not has an option box to download the item)
+- when using issimilar, i could compare all results and see which is the closest
+- think while loop in get_covers is useless
+- make cli args more intuitive (eg: --zips --covers)
+    - this way you don't have to say --use ... and if i want covers and zips I can
 - make searches option to retry, new query or a time out skip (no input will skip)
 - could add to metadata.py duplicate covers based on number value
     - eg: chapt 50 would duplicate the cover associated with 50
@@ -33,6 +40,7 @@ make linux and windows:
 - if cover not found use the one from mangakatana
 
 - amazon meta.py:
+    - only apply the data it was able to retrieve(IMPORTANT)
     - have data based on volumes
     - get book data if fails
     - add skip functionality

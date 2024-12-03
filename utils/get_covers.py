@@ -17,10 +17,10 @@ def get_manga_url(anime):
     print(f"Searching for {search_query}")
     try:
       container_name = "manga-card"
-      mangakatana = Site("test")
-      mangakatana.set_url(f"https://mangadex.org/search?q={anime}")
-      mangakatana.wait_for_all(By.CLASS_NAME, container_name)
-      manga_containers = mangakatana.get_containers(container_name)
+      mangadex = Site()
+      mangadex.set_url(f"https://mangadex.org/search?q={anime}")
+      mangadex.wait_for_all(By.CLASS_NAME, container_name)
+      manga_containers = mangadex.get_containers(container_name)
 
       for manga in manga_containers:
         web_manga_name = manga.find_element(By.TAG_NAME, "span").text.lower()
@@ -30,7 +30,8 @@ def get_manga_url(anime):
           print(anime, no_special_char)
           potential_urls.append(manga.find_element(By.TAG_NAME, "a").get_attribute("href"))
         break
-      search_found = True
+      if len(potential_urls) != 0:
+        search_found = True
   
     except Exception as e:  
         anime = search_retry_prompt(anime)
@@ -38,7 +39,7 @@ def get_manga_url(anime):
             return None
     if search_found:
       print("Urls successfully found")
-      mangakatana.quit()
+      mangadex.quit()
     try:
       return potential_urls[0]
     except IndexError:
