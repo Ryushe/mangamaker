@@ -35,11 +35,12 @@ def get_manga_url(anime):
   
     except Exception as e:  
         anime = search_retry_prompt(anime)
-        if anime == 'skip':
+        if anime == 's' or anime == 'n':
             return None
+        else:
+          get_manga_url(anime)
     if search_found:
       print("Urls successfully found")
-      mangadex.quit()
     try:
       return potential_urls[0]
     except IndexError:
