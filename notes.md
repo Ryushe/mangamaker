@@ -7,9 +7,11 @@ make linux and windows:
 - run script that installs calibre x 7z (checks if installed) x adds to env variables so can pull into program
 - docker container
 
+urls that are used (mangakatana donwload hosters)
+pixeldrain.com 
+gofile.io
+
 # Fixing:
-* cover length different from actual files for some reason 
-    - `length of files and item names arent the same somehow`
 
 # RN
 - why no get url but thow error when return self.url
@@ -20,12 +22,16 @@ make linux and windows:
 # Known cooked logic
 * mangamaker:
     * move files will say good move even if not at the end in (move_files)
+- when then end name is chapter.5 it doesnt work (eg: 175.5)
 
 # remember
 - search loop doesnt exit properly anymore
 - moved extract_numbrs to utils
+- change cover by get_covers.py getindexes()
 
 # Todo
+- at this location `Search failed. Retry (y/n/s(kip))` make have a timeout
+- covers not always being set correctly (maybe an index error?)
 - upon initial run make create archives folder and then exit
 - make output cuter and have a file dedicated to ascii art
 - make --use azips (this will auto download, if not has an option box to download the item)
@@ -39,6 +45,9 @@ make linux and windows:
 - migrate the get_covers and amazon -> the site class (see download_katana_zips.py)
 - if cover not found use the one from mangakatana
 
+- download zips:
+    - make the name more intuitive (have multiple options instead of use <option>)
+
 - amazon meta.py:
     - only apply the data it was able to retrieve(IMPORTANT)
     - have data based on volumes
@@ -46,6 +55,7 @@ make linux and windows:
     - add skip functionality
 
 - get_covers:
+    - change when it gets the covers, eg: if I give 1-200 make when it splits it thats when it uses the cover to apply
     - if fails make option to repeat
     - make compare name in potential urls list, one closest gets added
 
@@ -76,6 +86,8 @@ make linux and windows:
 
 
 # done
+* cover length different from actual files for some reason 
+    - `length of files and item names arent the same somehow`
 - include all info about the file in metadata
     - get_amazon_meta -> add items to dict from the spans
         - really all need to do is add to options array

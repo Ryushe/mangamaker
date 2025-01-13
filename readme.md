@@ -89,7 +89,10 @@ Currently I have a paper edition kindle
 - ggs, now you have the volume covers and the manga to go with it
     - note: covers found in `.tmp/.tmpcovers`
 
-	
+## FAQ
+Q: When the program extracts the files I get a "can't rename image"
+A: Open up the directory of the program and go to `.tmp/.tmp_img` you should see a folder that still contains data. This is the problem folder. Take all of the files contents, put it in a new folder and then put that new folder into the archive (replacing the old).
+
 ## Todo
 1. auto get downloaded zip files
 2. find and download ico files for the anime

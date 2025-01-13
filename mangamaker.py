@@ -193,8 +193,16 @@ def move_to_folder(files, output, tmp_folder=''): # not entirely sure works
 def start_points(args):
     option = str(args.use[0])
     if option == 'zips':
-        print("What anime and how many:\nInput format: <anime> <start-end>")
-        # usr_input = input("ex: berserk 50-200\n")
+        print("""
+#################################
+#                               #
+#      D O W N L O A D E R      #
+#                               #
+#################################
+    """)
+        print("What anime and how many volumes:\nInput format: <anime> <start-end>")
+        print("ex: berserk 50-200\n")
+        # usr_input = input()
         # anime, *chapts = str(usr_input.replace("-",' ')).split(" ")
         # chapts = [int(chapt) for chapt in chapts]
         anime = "tokyo ghoul"
@@ -297,7 +305,6 @@ def run_full_program(args):
     
 
 def main(args):
-
     # call different things based on args
     if args.use != None:
         start_points(args)
